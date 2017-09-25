@@ -1,0 +1,10 @@
+/*isso
+
+é um comentário de
+bloco*/
+
+//mais um comentário
+
+//outro comentário
+
+/*** comentário de *** bloco ****/
