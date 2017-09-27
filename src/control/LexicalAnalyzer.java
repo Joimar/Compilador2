@@ -35,10 +35,13 @@ public class LexicalAnalyzer {
 		index = 0;
 		try {
 		while (index < code.length() && code.charAt(index) != 3) {
-			while (code.charAt(index) == 9 || code.charAt(index) == 10 ||code.charAt(index) == 13 || code.charAt(index) == 32) {//ignora tab, nova linha, espacos
+			while (code.charAt(index) == 9 || code.charAt(index) == 10
+					||code.charAt(index) == 13 || code.charAt(index) == 32) {//ignora tab, nova linha, espacos
 				index++;
 			}
-			if (code.charAt(index) == '/') {
+			// Provável comentário
+			if (code.charAt(index) == '/' && (code.charAt(index+1) == '/'
+					|| code.charAt(index+1) == '*')) {
 				String answer = recognizeComment(code);
 				if (answer.equals("err")) {
 					System.out.println("Comentario mal formado");
@@ -46,12 +49,21 @@ public class LexicalAnalyzer {
 					System.out.println("Comentario nao fechado");
 				} else {
 					System.out.println("Comentario reconhecido");
-					System.out.println(answer);
+					//System.out.println(answer);
 				}
+			}
+			// Delimitador
+			else if (code.charAt(index) == ';' || code.charAt(index) == ','
+					|| code.charAt(index) == '(' || code.charAt(index) == ')'
+					|| code.charAt(index) == '[' || code.charAt(index) == ']'
+					|| code.charAt(index) == '{' || code.charAt(index) == '}'
+					|| code.charAt(index) == ':') {
+				index++;
+				System.out.println("Delimitador");
 			}
 		}
 		} catch (StringIndexOutOfBoundsException e) {
-			System.out.println("Codigo lido");
+			System.out.println("Código lido");
 		}
 		return true;
 	}
