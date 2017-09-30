@@ -34,44 +34,57 @@ public class LexicalAnalyzer {
 	boolean recognizeCode(String code) {
 		index = 0;
 		try {
-		while (index < code.length() && code.charAt(index) != 3) {
-			while (code.charAt(index) == 9 || code.charAt(index) == 10
-					||code.charAt(index) == 13 || code.charAt(index) == 32) {//ignora tab, nova linha, espacos
-				index++;
-			}
-			// Comentário
-			if (code.charAt(index) == '/' && (code.charAt(index+1) == '/'
-					|| code.charAt(index+1) == '*')) {
-				String answer = recognizeComment(code);
-				if (answer.equals("err")) {
-					System.out.println("Comentario mal formado");
-				} else if (answer.equals("EOF")) {
-					System.out.println("Comentario nao fechado");
-				} else {
-					System.out.println("Comentario");
+			while (index < code.length() && code.charAt(index) != 3) {
+				while (code.charAt(index) == 9 || code.charAt(index) == 10
+						||code.charAt(index) == 13 || code.charAt(index) == 32) {//ignora tab, nova linha, espacos
+					index++;
+				}
+				// Comentário
+				if (code.charAt(index) == '/' && (code.charAt(index+1) == '/'
+						|| code.charAt(index+1) == '*')) {
+					String answer = recognizeComment(code);
+					if (answer.equals("err")) {
+						System.out.println("Comentario mal formado");
+					} else if (answer.equals("EOF")) {
+						System.out.println("Comentario nao fechado");
+					} else {
+						System.out.println("Comentario");
+						//System.out.println(answer);
+					}
+				}
+				// Delimitador
+				else if (code.charAt(index) == ';' || code.charAt(index) == ','
+						|| code.charAt(index) == '(' || code.charAt(index) == ')'
+						|| code.charAt(index) == '[' || code.charAt(index) == ']'
+						|| code.charAt(index) == '{' || code.charAt(index) == '}'
+						|| code.charAt(index) == ':') {
+					index++;
+					System.out.println("Delimitador");
+				}
+				// Cadeia de caracteres
+				else if (code.charAt(index) == '"') {
+					String answer = recognizeString(code);
+					if (answer.equals("EOF")) {
+						System.out.println("Cadeia de caracteres nao fechada");
+					} else {
+						System.out.println("Cadeia de caracteres");
+						//System.out.println(answer);
+					}
+				}
+				// Operador relacional
+				else if ((code.charAt(index) == '!' && code.charAt(index+1) == '=')
+						|| code.charAt(index) == '=' || code.charAt(index) == '<'
+						|| code.charAt(index) == '>') {
+					String answer = recognizeRelop(code);
+					System.out.println("Operador relacional");
 					//System.out.println(answer);
 				}
-			}
-			// Delimitador
-			else if (code.charAt(index) == ';' || code.charAt(index) == ','
-					|| code.charAt(index) == '(' || code.charAt(index) == ')'
-					|| code.charAt(index) == '[' || code.charAt(index) == ']'
-					|| code.charAt(index) == '{' || code.charAt(index) == '}'
-					|| code.charAt(index) == ':') {
-				index++;
-				System.out.println("Delimitador");
-			}
-			// Cadeia de caracteres
-			else if (code.charAt(index) == '"') {
-				String answer = recognizeString(code);
-				if (answer.equals("EOF")) {
-					System.out.println("Cadeia de caracteres nao fechada");
-				} else {
-					System.out.println("Cadeia de caracteres");
-					//System.out.println(answer);
+				// Deesconhecido
+				else {
+					index++;
+					System.out.println("Desconhecido");
 				}
 			}
-		}
 		} catch (StringIndexOutOfBoundsException e) {
 			System.out.println("Código lido");
 		}
@@ -124,6 +137,11 @@ public class LexicalAnalyzer {
 		return "EOF";
 	}
 	
+	/**
+	 * Reconhece cadeia de caracteres
+	 * @param code
+	 * @return
+	 */
 	String recognizeString(String code) {
 		StringBuilder lexema = new StringBuilder();
 		if (code.charAt(index) == '"') {
@@ -146,6 +164,35 @@ public class LexicalAnalyzer {
 		} else {
 			return "err";
 		}
+	}
+	
+	/**
+	 * Reconhece operadores relacionais
+	 * @param code
+	 * @return
+	 */
+	String recognizeRelop(String code) {
+		StringBuilder lexema = new StringBuilder();
+		if (code.charAt(index) == '!' && code.charAt(index+1) == '=') {
+			lexema.append("!=");
+			index+=2;
+		} else if (code.charAt(index) == '=') {
+			lexema.append("=");
+			index++;
+		} else if (code.charAt(index) == '<' && code.charAt(index+1) == '=') {
+			lexema.append("<=");
+			index+=2;
+		} else if (code.charAt(index) == '>' && code.charAt(index+1) == '=') {
+			lexema.append(">=");
+			index+=2;
+		} else if (code.charAt(index) == '<') {
+			lexema.append("<");
+			index++;
+		} else if (code.charAt(index) == '>') {
+			lexema.append(">");
+			index++;
+		}
+		return lexema.toString();
 	}
 	
 	/**
