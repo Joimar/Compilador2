@@ -255,6 +255,11 @@ public class LexicalAnalyzer {
 		return lexema.toString();
 	}
 
+	/**
+	 * Reconhece identificadores e palavras reservadas
+	 * @param code
+	 * @return
+	 */
 	String recognizeID(String code) {
 		StringBuilder lexema = new StringBuilder();
 		if ((code.charAt(index) >= 65 && code.charAt(index) <= 90)
