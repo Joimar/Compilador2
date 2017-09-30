@@ -79,7 +79,18 @@ public class LexicalAnalyzer {
 					System.out.println("Operador relacional");
 					//System.out.println(answer);
 				}
-				// Deesconhecido
+				// Operador lógico
+				else if (code.charAt(index) == '!' || code.charAt(index) == '&'
+						|| code.charAt(index) == '|') {
+					String answer = recognizeLogop(code);
+					if (answer.equals("err")) {
+						System.out.println("Operador lógico mal formado");
+					} else {
+						System.out.println("Operador lógico");
+						//System.out.println(answer);
+					}
+				}
+				// Desconhecido
 				else {
 					index++;
 					System.out.println("Desconhecido");
@@ -190,6 +201,36 @@ public class LexicalAnalyzer {
 			index++;
 		} else if (code.charAt(index) == '>') {
 			lexema.append(">");
+			index++;
+		}
+		return lexema.toString();
+	}
+
+	/**
+	 * Reconhece operadores lógicos
+	 * @param code
+	 * @return
+	 */
+	String recognizeLogop(String code) {
+		StringBuilder lexema = new StringBuilder();
+		if (code.charAt(index) == '&') {
+			index++;
+			if (code.charAt(index) == '&') {
+				lexema.append("&&");
+				index++;
+			} else {
+				lexema.append("err");
+			}
+		} else if (code.charAt(index) == '|') {
+			index++;
+			if (code.charAt(index) == '|') {
+				lexema.append("||");
+				index++;
+			} else {
+				lexema.append("err");
+			}
+		} else if (code.charAt(index) == '!') {
+			lexema.append("!");
 			index++;
 		}
 		return lexema.toString();
