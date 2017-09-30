@@ -130,7 +130,7 @@ public class LexicalAnalyzer {
 			lexema.append(code.charAt(index));
 			index++;
 			while (index < code.length()) {
-				if (code.charAt(index) == '\\') {
+				if (code.charAt(index) == '\\' && code.charAt(index+1) == '"') {
 					lexema.append('"');
 					index+=2;
 				} else if (code.charAt(index) == '"') {
