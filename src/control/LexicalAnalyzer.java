@@ -90,6 +90,25 @@ public class LexicalAnalyzer {
 						//System.out.println(answer);
 					}
 				}
+				// Identificador ou palavra reservada
+				else if ((code.charAt(index) >= 65 && code.charAt(index) <= 90)
+						|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)) {
+					String answer = recognizeID(code);
+					if (answer.equals("err")) {
+						System.out.println("Identificador mal formado");
+					} else {
+						if (answer.equals("class") || answer.equals("final") || answer.equals("if")
+								|| answer.equals("else") || answer.equals("for") || answer.equals("scan")
+								|| answer.equals("print") || answer.equals("int") || answer.equals("float")
+								|| answer.equals("bool") || answer.equals("true") || answer.equals("false")
+								|| answer.equals("string")) {
+							System.out.println("Palavra reservada");
+						} else {
+							System.out.println("Identificador");
+						}
+						//System.out.println(answer);
+					}
+				}
 				// Desconhecido
 				else {
 					index++;
@@ -234,6 +253,40 @@ public class LexicalAnalyzer {
 			index++;
 		}
 		return lexema.toString();
+	}
+
+	String recognizeID(String code) {
+		StringBuilder lexema = new StringBuilder();
+		if ((code.charAt(index) >= 65 && code.charAt(index) <= 90)
+				|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)) {
+			lexema.append(code.charAt(index));
+			index++;
+			while ((code.charAt(index) >= 65 && code.charAt(index) <= 90) // letra maiúscula
+				|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)// letra minúscula
+				|| (code.charAt(index) >= 48 && code.charAt(index) <= 57) // dígito
+				|| (code.charAt(index) == 95)) {                          // underline
+				
+				lexema.append(code.charAt(index));
+				index++;
+			}
+			// analisar se o identificador é válido
+			if (code.charAt(index) == 32 || code.charAt(index) == 33
+					|| code.charAt(index) == 34 || code.charAt(index) == 37
+					|| code.charAt(index) == 38 || code.charAt(index) == 40
+					|| code.charAt(index) == 41 || code.charAt(index) == 42
+					|| code.charAt(index) == 43 || code.charAt(index) == 44
+					|| code.charAt(index) == 45 || code.charAt(index) == 47
+					|| code.charAt(index) == 59 || code.charAt(index) == 60
+					|| code.charAt(index) == 61 || code.charAt(index) == 62
+					|| code.charAt(index) == 91 || code.charAt(index) == 93
+					|| code.charAt(index) == 123 || code.charAt(index) == 124
+					|| code.charAt(index) == 125 || code.charAt(index) == 9
+					|| code.charAt(index) == 10 || code.charAt(index) == 13) {
+				return lexema.toString();
+			}
+		}
+		index++;
+		return "err";
 	}
 	
 	/**
