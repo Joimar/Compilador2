@@ -1,12 +1,17 @@
 package control;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class LexicalAnalyzer {
 	int index = 0;
+	FileWriter fw;
+	BufferedWriter bw;
 	
 	public static void main(String[] args) {
 		LexicalAnalyzer la = new LexicalAnalyzer();
@@ -18,10 +23,20 @@ public class LexicalAnalyzer {
 				System.out.println("====================================");
 				//System.out.println(filenames[i]);
 				//System.out.println(la.readTextFile(dir_codes + "/" + filenames[i]));
-				la.recognizeCode(la.readTextFile(dir_codes + "/" + filenames[i]));
+				la.recognizeCode(dir_codes, filenames[i]);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				if (la.bw != null)
+					la.bw.close();
+				
+				if (la.fw != null)
+					la.fw.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 	
@@ -30,9 +45,14 @@ public class LexicalAnalyzer {
 	 * para o automato mais indicado.
 	 * @param code
 	 * @return Verdadeiro se o codigo for aceito
+	 * @throws IOException 
 	 */
-	boolean recognizeCode(String code) {
+	boolean recognizeCode(String dir, String filename) throws IOException {
+		String code = readTextFile(dir + "/" + filename);
 		index = 0;
+		fw = new FileWriter(dir + "/results/" + filename);
+		bw = new BufferedWriter(fw);
+		bw.write("LEXEMA | TIPO | VALOR\n");
 		try {
 			while (index < code.length() && code.charAt(index) != 3) {
 				while (code.charAt(index) == 9 || code.charAt(index) == 10
@@ -45,8 +65,10 @@ public class LexicalAnalyzer {
 					String answer = recognizeComment(code);
 					if (answer.equals("err")) {
 						System.out.println("Comentario mal formado");
+						bw.write("Comentário mal formado\n");
 					} else if (answer.equals("EOF")) {
 						System.out.println("Comentario nao fechado");
+						bw.write("Comentário não fechado\n");
 					} else {
 						System.out.println("Comentario");
 						//System.out.println(answer);
@@ -58,16 +80,19 @@ public class LexicalAnalyzer {
 						|| code.charAt(index) == '[' || code.charAt(index) == ']'
 						|| code.charAt(index) == '{' || code.charAt(index) == '}'
 						|| code.charAt(index) == ':') {
+					//System.out.println("Delimitador");
+					bw.write(code.charAt(index) + " | Delimitador | " + code.charAt(index) + "\n");
 					index++;
-					System.out.println("Delimitador");
 				}
 				// Cadeia de caracteres
 				else if (code.charAt(index) == '"') {
 					String answer = recognizeString(code);
 					if (answer.equals("EOF")) {
-						System.out.println("Cadeia de caracteres nao fechada");
+						//System.out.println("Cadeia de caracteres nao fechada");
+						bw.write("ERRO: Cadeia de caracteres não fechada\n");
 					} else {
-						System.out.println("Cadeia de caracteres");
+						//System.out.println("Cadeia de caracteres");
+						bw.write(answer + " | Cadeia de caracteres | " + answer.substring(1, answer.length() - 1) + "\n");
 						//System.out.println(answer);
 					}
 				}
@@ -76,7 +101,7 @@ public class LexicalAnalyzer {
 						|| code.charAt(index) == '=' || code.charAt(index) == '<'
 						|| code.charAt(index) == '>') {
 					String answer = recognizeRelop(code);
-					System.out.println("Operador relacional");
+					//System.out.println("Operador relacional");
 					//System.out.println(answer);
 				}
 				// Operador lógico
@@ -84,9 +109,10 @@ public class LexicalAnalyzer {
 						|| code.charAt(index) == '|') {
 					String answer = recognizeLogop(code);
 					if (answer.equals("err")) {
-						System.out.println("Operador lógico mal formado");
+						//System.out.println("Operador lógico mal formado");
+						bw.write("ERRO: Operador lógico mal formado.\n");
 					} else {
-						System.out.println("Operador lógico");
+						//System.out.println("Operador lógico");
 						//System.out.println(answer);
 					}
 				}
@@ -102,9 +128,11 @@ public class LexicalAnalyzer {
 								|| answer.equals("print") || answer.equals("int") || answer.equals("float")
 								|| answer.equals("bool") || answer.equals("true") || answer.equals("false")
 								|| answer.equals("string")) {
-							System.out.println("Palavra reservada");
+							//System.out.println("Palavra reservada");
+							bw.write(answer + " | Palavra reservada | " + answer + "\n");
 						} else {
-							System.out.println("Identificador");
+							//System.out.println("Identificador");
+							bw.write(answer + " | Identificador | " + "apontador" + "\n");
 						}
 						//System.out.println(answer);
 					}
@@ -113,6 +141,7 @@ public class LexicalAnalyzer {
 				else {
 					index++;
 					System.out.println("Desconhecido");
+					bw.write("ERRO: Símbolo inválido.\n");
 				}
 			}
 		} catch (StringIndexOutOfBoundsException e) {
@@ -200,28 +229,37 @@ public class LexicalAnalyzer {
 	 * Reconhece operadores relacionais
 	 * @param code
 	 * @return
+	 * @throws IOException
 	 */
-	String recognizeRelop(String code) {
+	String recognizeRelop(String code) throws IOException {
 		StringBuilder lexema = new StringBuilder();
+		String value = "";
 		if (code.charAt(index) == '!' && code.charAt(index+1) == '=') {
 			lexema.append("!=");
 			index+=2;
+			value = "NE";
 		} else if (code.charAt(index) == '=') {
 			lexema.append("=");
 			index++;
+			value = "EQ";
 		} else if (code.charAt(index) == '<' && code.charAt(index+1) == '=') {
 			lexema.append("<=");
 			index+=2;
+			value = "LE";
 		} else if (code.charAt(index) == '>' && code.charAt(index+1) == '=') {
 			lexema.append(">=");
 			index+=2;
+			value = "GE";
 		} else if (code.charAt(index) == '<') {
 			lexema.append("<");
 			index++;
+			value = "LT";
 		} else if (code.charAt(index) == '>') {
 			lexema.append(">");
 			index++;
+			value = "GT";
 		}
+		bw.write(lexema.toString() + " | Operador relacional | " + value + "\n");
 		return lexema.toString();
 	}
 
@@ -229,29 +267,37 @@ public class LexicalAnalyzer {
 	 * Reconhece operadores lógicos
 	 * @param code
 	 * @return
+	 * @throws IOException
 	 */
-	String recognizeLogop(String code) {
+	String recognizeLogop(String code) throws IOException {
 		StringBuilder lexema = new StringBuilder();
+		String value = "";
 		if (code.charAt(index) == '&') {
 			index++;
 			if (code.charAt(index) == '&') {
 				lexema.append("&&");
 				index++;
+				value = "AND";
 			} else {
 				lexema.append("err");
+				return lexema.toString();
 			}
 		} else if (code.charAt(index) == '|') {
 			index++;
 			if (code.charAt(index) == '|') {
 				lexema.append("||");
 				index++;
+				value = "OR";
 			} else {
 				lexema.append("err");
+				return lexema.toString();
 			}
 		} else if (code.charAt(index) == '!') {
 			lexema.append("!");
 			index++;
+			value = "NOT";
 		}
+		bw.write(lexema.toString() + " | Operador lógico | " + value + "\n");
 		return lexema.toString();
 	}
 
@@ -325,14 +371,17 @@ public class LexicalAnalyzer {
 	String[] getFilenames(String path) {
 		File folder = new File(path);
 		File[] listOfFiles = folder.listFiles();
-		String[] filenames = new String[listOfFiles.length];
+		ArrayList<String> filenames = new ArrayList<String>();
+		//String[] filenames = new String[listOfFiles.length];
 		for (int i = 0; i < listOfFiles.length; i++) {
 			if (listOfFiles[i].isFile()) {
-				filenames[i] = listOfFiles[i].getName();
+				filenames.add(listOfFiles[i].getName());
 			} else if (listOfFiles[i].isDirectory()) {
 				// Fazer nada
 			}
 		}
-		return filenames;
+		String[] filenamesArray = new String[filenames.size()];
+		filenames.toArray(filenamesArray);
+		return filenamesArray;
 	}
 }
