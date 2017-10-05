@@ -121,7 +121,7 @@ public class LexicalAnalyzer {
 						|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)) {
 					String answer = recognizeID(code);
 					if (answer.equals("err")) {
-						System.out.println("Identificador mal formado");
+						bw.write("Erro: Identificador mal formado\n");
 					} else {
 						if (answer.equals("class") || answer.equals("final") || answer.equals("if")
 								|| answer.equals("else") || answer.equals("for") || answer.equals("scan")
@@ -321,8 +321,9 @@ public class LexicalAnalyzer {
 				index++;
 			}
 			// analisar se o identificador é válido
-			if (code.charAt(index) == 32 || code.charAt(index) == 33
-					|| code.charAt(index) == 34 || code.charAt(index) == 37
+			if (code.charAt(index) == 9 || code.charAt(index) == 10
+					|| code.charAt(index) == 13 || code.charAt(index) == 32
+					|| code.charAt(index) == 33 || code.charAt(index) == 37
 					|| code.charAt(index) == 38 || code.charAt(index) == 40
 					|| code.charAt(index) == 41 || code.charAt(index) == 42
 					|| code.charAt(index) == 43 || code.charAt(index) == 44
@@ -331,8 +332,7 @@ public class LexicalAnalyzer {
 					|| code.charAt(index) == 61 || code.charAt(index) == 62
 					|| code.charAt(index) == 91 || code.charAt(index) == 93
 					|| code.charAt(index) == 123 || code.charAt(index) == 124
-					|| code.charAt(index) == 125 || code.charAt(index) == 9
-					|| code.charAt(index) == 10 || code.charAt(index) == 13) {
+					|| code.charAt(index) == 125) {
 				return lexema.toString();
 			}
 		}
