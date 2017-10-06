@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class LexicalAnalyzer {
 	int index = 0;
+	int line = 0;
 	FileWriter fw;
 	BufferedWriter bw;
 	
@@ -52,11 +53,14 @@ public class LexicalAnalyzer {
 		index = 0;
 		fw = new FileWriter(dir + "/results/" + filename);
 		bw = new BufferedWriter(fw);
-		bw.write("LEXEMA | TIPO | VALOR\n");
+
 		try {
 			while (index < code.length() && code.charAt(index) != 3) {
 				while (code.charAt(index) == 9 || code.charAt(index) == 10
 						||code.charAt(index) == 13 || code.charAt(index) == 32) {//ignora tab, nova linha, espacos
+					if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+						line++;
+					}
 					index++;
 				}
 				// Comentário
@@ -81,7 +85,7 @@ public class LexicalAnalyzer {
 						|| code.charAt(index) == '{' || code.charAt(index) == '}'
 						|| code.charAt(index) == ':') {
 					//System.out.println("Delimitador");
-					bw.write(code.charAt(index) + " | Delimitador | " + code.charAt(index) + "\n");
+					bw.write(line + " " + code.charAt(index) + " delimitador" + "\n");
 					index++;
 				}
 				// Cadeia de caracteres
@@ -92,7 +96,7 @@ public class LexicalAnalyzer {
 						bw.write("ERRO: Cadeia de caracteres não fechada\n");
 					} else {
 						//System.out.println("Cadeia de caracteres");
-						bw.write(answer + " | Cadeia de caracteres | " + answer.substring(1, answer.length() - 1) + "\n");
+						bw.write(line + " " + answer.substring(1, answer.length() - 1) + " Cadeia de caracteres\n");
 						//System.out.println(answer);
 					}
 				}
@@ -129,10 +133,10 @@ public class LexicalAnalyzer {
 								|| answer.equals("bool") || answer.equals("true") || answer.equals("false")
 								|| answer.equals("string")) {
 							//System.out.println("Palavra reservada");
-							bw.write(answer + " | Palavra reservada | " + answer + "\n");
+							bw.write(line + " " + answer + " palavra_reservada\n");
 						} else {
 							//System.out.println("Identificador");
-							bw.write(answer + " | Identificador | " + "apontador" + "\n");
+							bw.write(line + " " + answer + " identificador\n");
 						}
 						//System.out.println(answer);
 					}
@@ -172,6 +176,7 @@ public class LexicalAnalyzer {
 				lexema.append(code.charAt(index));
 				index++;
 			}
+			line++;
 			return lexema.toString();
 		} else {
 			return "err";
@@ -186,6 +191,9 @@ public class LexicalAnalyzer {
 			if (code.charAt(index) != ('*')) {
 				star = false;
 				lexema.append(code.charAt(index));
+				if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+					line++;
+				}
 				index++;
 			} else {
 				star = true;
@@ -216,6 +224,9 @@ public class LexicalAnalyzer {
 					return lexema.toString();
 				} else {
 					lexema.append(code.charAt(index));
+					if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+						line++;
+					}
 					index++;
 				}
 			}
@@ -259,7 +270,7 @@ public class LexicalAnalyzer {
 			index++;
 			value = "GT";
 		}
-		bw.write(lexema.toString() + " | Operador relacional | " + value + "\n");
+		bw.write(line + " " + lexema.toString() + " operador_relacional\n");
 		return lexema.toString();
 	}
 
@@ -297,7 +308,7 @@ public class LexicalAnalyzer {
 			index++;
 			value = "NOT";
 		}
-		bw.write(lexema.toString() + " | Operador lógico | " + value + "\n");
+		bw.write(line + " " + lexema.toString() + " operador_logico\n");
 		return lexema.toString();
 	}
 
