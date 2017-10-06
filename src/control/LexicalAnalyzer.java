@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class LexicalAnalyzer {
 	int index = 0;
-	int line = 0;
+	int line = 1;
 	FileWriter fw;
 	BufferedWriter bw;
 	
@@ -91,9 +91,9 @@ public class LexicalAnalyzer {
 				// Cadeia de caracteres
 				else if (code.charAt(index) == '"') {
 					String answer = recognizeString(code);
-					if (answer.equals("EOF")) {
+					if (answer.equals("EOF") || answer.equals("err")) {
 						//System.out.println("Cadeia de caracteres nao fechada");
-						bw.write("ERRO: Cadeia de caracteres não fechada\n");
+						//bw.write("string_mal_formado\n");
 					} else {
 						//System.out.println("Cadeia de caracteres");
 						bw.write(line + " " + answer.substring(1, answer.length() - 1) + " Cadeia de caracteres\n");
@@ -208,8 +208,9 @@ public class LexicalAnalyzer {
 	 * Reconhece cadeia de caracteres
 	 * @param code
 	 * @return
+	 * @throws IOException 
 	 */
-	String recognizeString(String code) {
+	String recognizeString(String code) throws IOException {
 		StringBuilder lexema = new StringBuilder();
 		if (code.charAt(index) == '"') {
 			lexema.append(code.charAt(index));
@@ -223,15 +224,21 @@ public class LexicalAnalyzer {
 					index++;
 					return lexema.toString();
 				} else {
-					lexema.append(code.charAt(index));
 					if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+						bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
 						line++;
+						index++;
+						return "err";
+					} else {
+						lexema.append(code.charAt(index));
 					}
 					index++;
 				}
 			}
+			bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
 			return "EOF";
 		} else {
+			bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
 			return "err";
 		}
 	}
