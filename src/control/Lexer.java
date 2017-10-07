@@ -135,6 +135,13 @@ public class Lexer {
 						//System.out.println(answer);
 					}
 				}
+				// Operador aritmético
+				else if (code.charAt(index) == '+' || code.charAt(index) == '-'
+						|| code.charAt(index) == '*' || code.charAt(index) == '/'
+						|| code.charAt(index) == '%') {
+					bw.write(line + " " + code.charAt(index) + " operador_aritmetico\n");
+					index++;
+				}
 				// Desconhecido
 				else {
 					error.add(line + " " + code.charAt(index) + " simbolo_invalido\n");
