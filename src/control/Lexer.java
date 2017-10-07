@@ -8,14 +8,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class LexicalAnalyzer {
+public class Lexer {
 	int index = 0;
 	int line = 1;
 	FileWriter fw;
 	BufferedWriter bw;
+	ArrayList<String> error = new ArrayList<String>();
 	
 	public static void main(String[] args) {
-		LexicalAnalyzer la = new LexicalAnalyzer();
+		Lexer la = new Lexer();
 		try {
 			String dir_codes = "entrada";
 			String[] filenames = la.getFilenames(dir_codes);
@@ -93,11 +94,9 @@ public class LexicalAnalyzer {
 					String answer = recognizeString(code);
 					if (answer.equals("EOF") || answer.equals("err")) {
 						//System.out.println("Cadeia de caracteres nao fechada");
-						//bw.write("string_mal_formado\n");
 					} else {
 						//System.out.println("Cadeia de caracteres");
 						bw.write(line + " " + answer.substring(1, answer.length() - 1) + " Cadeia de caracteres\n");
-						//System.out.println(answer);
 					}
 				}
 				// Operador relacional
@@ -106,7 +105,6 @@ public class LexicalAnalyzer {
 						|| code.charAt(index) == '>') {
 					String answer = recognizeRelop(code);
 					//System.out.println("Operador relacional");
-					//System.out.println(answer);
 				}
 				// Operador lógico
 				else if (code.charAt(index) == '!' || code.charAt(index) == '&'
@@ -114,10 +112,8 @@ public class LexicalAnalyzer {
 					String answer = recognizeLogop(code);
 					if (answer.equals("err")) {
 						//System.out.println("Operador lógico mal formado");
-						bw.write("ERRO: Operador lógico mal formado.\n");
 					} else {
 						//System.out.println("Operador lógico");
-						//System.out.println(answer);
 					}
 				}
 				// Identificador ou palavra reservada
@@ -125,17 +121,15 @@ public class LexicalAnalyzer {
 						|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)) {
 					String answer = recognizeID(code);
 					if (answer.equals("err")) {
-						bw.write("Erro: Identificador mal formado\n");
+						//
 					} else {
 						if (answer.equals("class") || answer.equals("final") || answer.equals("if")
 								|| answer.equals("else") || answer.equals("for") || answer.equals("scan")
 								|| answer.equals("print") || answer.equals("int") || answer.equals("float")
 								|| answer.equals("bool") || answer.equals("true") || answer.equals("false")
 								|| answer.equals("string")) {
-							//System.out.println("Palavra reservada");
 							bw.write(line + " " + answer + " palavra_reservada\n");
 						} else {
-							//System.out.println("Identificador");
 							bw.write(line + " " + answer + " identificador\n");
 						}
 						//System.out.println(answer);
@@ -143,13 +137,16 @@ public class LexicalAnalyzer {
 				}
 				// Desconhecido
 				else {
+					error.add(line + " " + code.charAt(index) + " simbolo_invalido\n");
 					index++;
-					System.out.println("Desconhecido");
-					bw.write("ERRO: Símbolo inválido.\n");
 				}
 			}
 		} catch (StringIndexOutOfBoundsException e) {
 			System.out.println("Código lido");
+			bw.write("\n");
+			for (int i = 0; i < error.size(); i++) {
+				bw.write(error.get(i));
+			}
 		}
 		return true;
 	}
@@ -225,7 +222,8 @@ public class LexicalAnalyzer {
 					return lexema.toString();
 				} else {
 					if (code.charAt(index) == 10 || code.charAt(index) == 13) {
-						bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
+						//bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
+						error.add(line + " " + lexema.toString() + " string_mal_formado\n");
 						line++;
 						index++;
 						return "err";
@@ -235,10 +233,12 @@ public class LexicalAnalyzer {
 					index++;
 				}
 			}
-			bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
+			//bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
+			error.add(line + " " + lexema.toString() + " string_mal_formado\n");
 			return "EOF";
 		} else {
-			bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
+			//bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
+			error.add(line + " " + lexema.toString() + " string_mal_formado\n");
 			return "err";
 		}
 	}
@@ -297,6 +297,8 @@ public class LexicalAnalyzer {
 				index++;
 				value = "AND";
 			} else {
+				//bw.write(line + " & operador_logico_mal_formado\n");
+				error.add(line + " & operador_logico_mal_formado\n");
 				lexema.append("err");
 				return lexema.toString();
 			}
@@ -307,6 +309,8 @@ public class LexicalAnalyzer {
 				index++;
 				value = "OR";
 			} else {
+				//bw.write(line + " | operador_logico_mal_formado\n");
+				error.add(line + " | operador_logico_mal_formado\n");
 				lexema.append("err");
 				return lexema.toString();
 			}
@@ -323,8 +327,9 @@ public class LexicalAnalyzer {
 	 * Reconhece identificadores e palavras reservadas
 	 * @param code
 	 * @return
+	 * @throws IOException 
 	 */
-	String recognizeID(String code) {
+	String recognizeID(String code) throws IOException {
 		StringBuilder lexema = new StringBuilder();
 		if ((code.charAt(index) >= 65 && code.charAt(index) <= 90)
 				|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)) {
@@ -354,6 +359,9 @@ public class LexicalAnalyzer {
 				return lexema.toString();
 			}
 		}
+		lexema.append(code.charAt(index));
+		//bw.write(line + " " + lexema.toString() + " identificador_mal_formado\n");
+		error.add(line + " " + lexema.toString() + " identificador_mal_formado\n");
 		index++;
 		return "err";
 	}
