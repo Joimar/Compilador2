@@ -403,7 +403,6 @@ public class Lexer {
 	 */
 	String recognizeNumber(String code) {
 		StringBuilder lexema = new StringBuilder();
-
 		
 		if (isNumber(code, index)) { // numero positivo
 			lexema.append(code.charAt(index));
@@ -439,6 +438,12 @@ public class Lexer {
 		
 		if (isDelimiter(code, index)) { // analisar se eh um numero valido
 			return lexema.toString();
+		} else {
+			while (!isDelimiter(code, index)) {
+				lexema.append(code.charAt(index));
+				index++;
+			}
+			error.add(line + " " + lexema.toString() + " numero_mal_formado\n");
 		}
 		
 		//index++;
