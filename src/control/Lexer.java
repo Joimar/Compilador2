@@ -71,10 +71,9 @@ public class Lexer {
 					String answer = recognizeComment(code);
 					if (answer.equals("err")) {
 						System.out.println("Comentario mal formado");
-						bw.write("Comentario mal formado\n");
+						//bw.write("Comentario mal formado\n");
 					} else if (answer.equals("EOF")) {
 						System.out.println("Comentario nao fechado");
-						bw.write("Comentario nao fechado\n");
 					} else {
 						lastToken = "COM";
 						System.out.println("Comentario");
@@ -169,6 +168,8 @@ public class Lexer {
 				}
 			}
 		} catch (StringIndexOutOfBoundsException e) {
+			// Fazer nada
+		} finally {
 			System.out.println("Codigo lido");
 			bw.write("\n");
 			for (int i = 0; i < error.size(); i++) {
@@ -181,8 +182,9 @@ public class Lexer {
 	/**
 	 * Reconhece comentarios
 	 * @return 0-Nao reconhecido; 1-Reconhecido; 2-Comentario nao fechado
+	 * @throws IOException 
 	 */
-	String recognizeComment(String code) {
+	String recognizeComment(String code) throws IOException {
 		StringBuilder lexema = new StringBuilder();
 		if (code.charAt(index) == '/') {
 			lexema.append(code.charAt(index));
@@ -225,6 +227,7 @@ public class Lexer {
 				index++;
 			}
 		}
+		error.add(line-1 + " " + lexema.toString().substring(0, lexema.toString().length() - 1) + " comentario_mal_formado\n");
 		return "EOF";
 	}
 	
@@ -394,7 +397,7 @@ public class Lexer {
 	}
 	
 	/**
-	 * Reconhece n�meros
+	 * Reconhece numeros
 	 * @param code
 	 * @return
 	 */
