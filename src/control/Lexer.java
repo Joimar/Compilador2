@@ -60,7 +60,7 @@ public class Lexer {
 			while (index < code.length() && code.charAt(index) != 3) {
 				while (code.charAt(index) == 9 || code.charAt(index) == 10
 						||code.charAt(index) == 13 || code.charAt(index) == 32) {//ignora tab, nova linha, espacos
-					if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+					if (code.charAt(index) == 10) {
 						line++;
 					}
 					index++;
@@ -217,7 +217,7 @@ public class Lexer {
 			if (code.charAt(index) != ('*')) {
 				star = false;
 				lexema.append(code.charAt(index));
-				if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+				if (code.charAt(index) == 10) {
 					line++;
 				}
 				index++;
@@ -251,7 +251,7 @@ public class Lexer {
 					index++;
 					return lexema.toString();
 				} else {
-					if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+					if (code.charAt(index) == 10) {
 						//bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
 						error.add(line + " " + lexema.toString() + " string_mal_formado\n");
 						line++;
@@ -411,7 +411,7 @@ public class Lexer {
 			index++;
 			while (code.charAt(index) == 9 || code.charAt(index) == 10
 							|| code.charAt(index) == 13 || code.charAt(index) == 32) {
-				if (code.charAt(index) == 10 || code.charAt(index) == 13) {
+				if (code.charAt(index) == 10) {
 					line++;
 				}
 				index++;
