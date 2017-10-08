@@ -389,10 +389,11 @@ public class Lexer {
 				return lexema.toString();
 			}
 		}
-		lexema.append(code.charAt(index));
-		//bw.write(line + " " + lexema.toString() + " identificador_mal_formado\n");
+		while (!isDelimiter(code, index)) {
+			lexema.append(code.charAt(index));
+			index++;
+		}
 		error.add(line + " " + lexema.toString() + " identificador_mal_formado\n");
-		index++;
 		return "err";
 	}
 	
