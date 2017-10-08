@@ -239,6 +239,8 @@ public class Lexer {
 	 */
 	String recognizeString(String code) throws IOException {
 		StringBuilder lexema = new StringBuilder();
+		boolean simboloNaoReconhecido = false; // indica se a string possui algum simbolo nao reconhecido
+		int errorLine = line; // caso a string esteja errada e tenha mais de uma linha, a linha exibida na saida sera a primeira da string
 		if (code.charAt(index) == '"') {
 			lexema.append(code.charAt(index));
 			index++;
@@ -249,26 +251,29 @@ public class Lexer {
 				} else if (code.charAt(index) == '"') {
 					lexema.append('"');
 					index++;
-					return lexema.toString();
-				} else {
-					if (code.charAt(index) == 10) {
-						//bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
-						error.add(line + " " + lexema.toString() + " string_mal_formado\n");
-						line++;
-						index++;
-						return "err";
+					if (!simboloNaoReconhecido) {
+						return lexema.toString();
 					} else {
-						lexema.append(code.charAt(index));
+						error.add(errorLine + " " + lexema.toString() + " string_mal_formado\n");
+						return "err";
 					}
+				} else {
+					lexema.append(code.charAt(index));
+					if (code.charAt(index) < 32 || code.charAt(index) > 126) { 
+						if (code.charAt(index) == 10) {
+							line++;
+						}
+						simboloNaoReconhecido = true; // nao eh um simbolo reconhecido pela string
+					} 
 					index++;
 				}
 			}
 			//bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
-			error.add(line + " " + lexema.toString() + " string_mal_formado\n");
+			error.add(errorLine + " " + lexema.toString() + " string_mal_formado\n");
 			return "EOF";
 		} else {
 			//bw.write(line + " " + lexema.toString() + " string_mal_formado\n");
-			error.add(line + " " + lexema.toString() + " string_mal_formado\n");
+			error.add(errorLine + " " + lexema.toString() + " string_mal_formado\n");
 			return "err";
 		}
 	}
