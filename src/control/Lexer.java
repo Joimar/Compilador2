@@ -65,16 +65,16 @@ public class Lexer {
 					}
 					index++;
 				}
-				// Comentário
+				// Comentario
 				if (code.charAt(index) == '/' && (code.charAt(index+1) == '/'
 						|| code.charAt(index+1) == '*')) {
 					String answer = recognizeComment(code);
 					if (answer.equals("err")) {
 						System.out.println("Comentario mal formado");
-						bw.write("Comentário mal formado\n");
+						bw.write("Comentario mal formado\n");
 					} else if (answer.equals("EOF")) {
 						System.out.println("Comentario nao fechado");
-						bw.write("Comentário não fechado\n");
+						bw.write("Comentario nao fechado\n");
 					} else {
 						lastToken = "COM";
 						System.out.println("Comentario");
@@ -111,15 +111,15 @@ public class Lexer {
 					lastToken = "RELOP";
 					//System.out.println("Operador relacional");
 				}
-				// Operador lógico
+				// Operador logico
 				else if (code.charAt(index) == '!' || code.charAt(index) == '&'
 						|| code.charAt(index) == '|') {
 					String answer = recognizeLogop(code);
 					if (answer.equals("err")) {
-						//System.out.println("Operador lógico mal formado");
+						//System.out.println("Operador logico mal formado");
 					} else {
 						lastToken = "LOGOP";
-						//System.out.println("Operador lógico");
+						//System.out.println("Operador logico");
 					}
 				}
 				// Identificador ou palavra reservada
@@ -143,18 +143,18 @@ public class Lexer {
 						//System.out.println(answer);
 					}
 				}
-				// Número
+				// Numero
 				else if (isNumber(code, index) || isNegativeNumber(code)) {
 					String answer = recognizeNumber(code);
 					if (answer.equals("err")) {
-						//System.out.println("Número mal formado");
+						//System.out.println("Numero mal formado");
 					} else {
-						//System.out.println("Número:" + answer);
+						//System.out.println("Numero:" + answer);
 						lastToken = "NUM";
-						bw.write(line + " " + answer + " número\n");
+						bw.write(line + " " + answer + " numero\n");
 					}
 				}
-				// Operador aritmético
+				// Operador aritmetico
 				else if (code.charAt(index) == '+' || code.charAt(index) == '-'
 						|| code.charAt(index) == '*' || code.charAt(index) == '/'
 						|| code.charAt(index) == '%') {
@@ -169,7 +169,7 @@ public class Lexer {
 				}
 			}
 		} catch (StringIndexOutOfBoundsException e) {
-			System.out.println("Código lido");
+			System.out.println("Codigo lido");
 			bw.write("\n");
 			for (int i = 0; i < error.size(); i++) {
 				bw.write(error.get(i));
@@ -309,7 +309,7 @@ public class Lexer {
 	}
 
 	/**
-	 * Reconhece operadores lógicos
+	 * Reconhece operadores logicos
 	 * @param code
 	 * @return
 	 * @throws IOException
@@ -362,15 +362,15 @@ public class Lexer {
 				|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)) {
 			lexema.append(code.charAt(index));
 			index++;
-			while ((code.charAt(index) >= 65 && code.charAt(index) <= 90) // letra maiúscula
-				|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)// letra minúscula
-				|| (code.charAt(index) >= 48 && code.charAt(index) <= 57) // dígito
+			while ((code.charAt(index) >= 65 && code.charAt(index) <= 90) // letra maiuscula
+				|| (code.charAt(index) >= 97 && code.charAt(index) <= 122)// letra minuscula
+				|| (code.charAt(index) >= 48 && code.charAt(index) <= 57) // digito
 				|| (code.charAt(index) == 95)) {                          // underline
 				
 				lexema.append(code.charAt(index));
 				index++;
 			}
-			// analisar se o identificador é válido
+			// analisar se o identificador eh valido
 			if (code.charAt(index) == 9 || code.charAt(index) == 10
 					|| code.charAt(index) == 13 || code.charAt(index) == 32
 					|| code.charAt(index) == 33 || code.charAt(index) == 37
@@ -394,7 +394,7 @@ public class Lexer {
 	}
 	
 	/**
-	 * Reconhece números
+	 * Reconhece nï¿½meros
 	 * @param code
 	 * @return
 	 */
@@ -402,10 +402,10 @@ public class Lexer {
 		StringBuilder lexema = new StringBuilder();
 
 		
-		if (isNumber(code, index)) { // número positivo
+		if (isNumber(code, index)) { // numero positivo
 			lexema.append(code.charAt(index));
 			index++;
-		} else if (code.charAt(index) == '-') { // número negativo
+		} else if (code.charAt(index) == '-') { // numero negativo
 			index++;
 			while (code.charAt(index) == 9 || code.charAt(index) == 10
 							|| code.charAt(index) == 13 || code.charAt(index) == 32) {
@@ -420,12 +420,12 @@ public class Lexer {
 			}
 		}
 		
-		while (isNumber(code, index)) { // enquanto houver dígitos, acrescentar ao lexema
+		while (isNumber(code, index)) { // enquanto houver digitos, acrescentar ao lexema
 			lexema.append(code.charAt(index));
 			index++;
 		}
 		
-		if (code.charAt(index) == '.' && isNumber(code, index+1)) { // número com casa decimal
+		if (code.charAt(index) == '.' && isNumber(code, index+1)) { // numero com casa decimal
 			lexema.append("." + code.charAt(index+1));
 			index+=2;
 			while (isNumber(code, index)) {
@@ -434,7 +434,7 @@ public class Lexer {
 			}
 		} 
 		
-		if (isDelimiter(code, index)) { // analisar se é um número válido
+		if (isDelimiter(code, index)) { // analisar se eh um numero valido
 			return lexema.toString();
 		}
 		
@@ -443,7 +443,7 @@ public class Lexer {
 	}
 	
 	/**
-	 * Verifica se o caractere no índice especificado é do tipo número
+	 * Verifica se o caractere no indice especificado eh do tipo numero
 	 * @param code
 	 * @param index
 	 * @return
@@ -453,22 +453,22 @@ public class Lexer {
 	}
 	
 	/**
-	 * Verifica se é número negativo
+	 * Verifica se eh numero negativo
 	 * @param code
 	 * @param index
 	 * @return
 	 */
 	boolean isNegativeNumber(String code) {
 		int auxIndex = index;
-		// precisa começar sinal negativo e o token anterior não pode ser número nem identificador
+		// precisa comecar sinal negativo e o token anterior nao pode ser numero nem identificador
 		if (code.charAt(auxIndex) == '-' && !lastToken.equals("NUM") && !lastToken.equals("ID")) { 
 			auxIndex++;
-			// pode haver espaços entre o sinal negativo e o primeiro dígito
+			// pode haver espacos entre o sinal negativo e o primeiro digito
 			while (code.charAt(auxIndex) == 9 || code.charAt(auxIndex) == 10
 							|| code.charAt(auxIndex) == 13 || code.charAt(auxIndex) == 32) {
 				auxIndex++;
 			}
-			if (isNumber(code, auxIndex)) { // verifica se o primeiro caractere após os espaços é um dígito
+			if (isNumber(code, auxIndex)) { // verifica se o primeiro caractere apos os espacos eh um digito
 				return true;
 			}
 		}
@@ -476,7 +476,7 @@ public class Lexer {
 	}
 	
 	/**
-	 * Verifica se chegou a um delimitador de identificador ou número
+	 * Verifica se chegou a um delimitador de identificador ou numero
 	 * @param code
 	 * @param index
 	 * @return
