@@ -163,8 +163,13 @@ public class Lexer {
 				}
 				// Desconhecido
 				else {
-					error.add(line + " " + code.charAt(index) + " simbolo_invalido\n");
-					index++;
+					StringBuilder lexema = new StringBuilder();
+					while (!isDelimiter(code, index)) {
+						lexema.append(code.charAt(index));
+						index++;
+					}
+					error.add(line + " " + lexema.toString() + " simbolo_invalido\n");
+					//index++;
 				}
 			}
 		} catch (StringIndexOutOfBoundsException e) {
