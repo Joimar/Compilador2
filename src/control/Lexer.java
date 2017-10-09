@@ -26,6 +26,7 @@ public class Lexer {
 				System.out.println("====================================");
 				//System.out.println(filenames[i]);
 				//System.out.println(la.readTextFile(dir_codes + "/" + filenames[i]));
+				la.error.clear();
 				la.recognizeCode(dir_codes, filenames[i]);
 			}
 		} catch (IOException e) {
@@ -51,6 +52,17 @@ public class Lexer {
 	 * @throws IOException 
 	 */
 	boolean recognizeCode(String dir, String filename) throws IOException {
+		// if the directory does not exist, create it
+		File folder = new File(dir + "/results");
+		if (!folder.exists()) {
+		    boolean result = false;
+		    folder.mkdir();
+		    result = true;
+		    if(result) {
+		        System.out.println("Folder created");  
+		    }
+		}
+		
 		String code = readTextFile(dir + "/" + filename);
 		index = 0;
 		fw = new FileWriter(dir + "/results/" + filename);
