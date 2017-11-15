@@ -8,13 +8,15 @@ public class Main {
 		try {
 			String dir_codes = "entrada";
 			String[] filenames = la.getFilenames(dir_codes);
-			System.out.println(filenames.length + " arquivos encontrados");
+			System.out.println(filenames.length + " arquivos encontrados\n");
 			for (int i = 0; i < filenames.length; i++) {
-				System.out.println("====================================");
+				//System.out.println("====================================");
 				//System.out.println(filenames[i]);
 				//System.out.println(la.readTextFile(dir_codes + "/" + filenames[i]));
 				la.error.clear();
-				la.recognizeCode(dir_codes, filenames[i]);
+				la.recognizeCode(dir_codes, filenames[i]);			
+				Parser parser = new Parser(la.tokensList);
+				parser.readTokens();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

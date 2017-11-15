@@ -8,12 +8,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import model.Token;
+
 public class Lexer {
 	int index = 0;
 	int line = 1;
 	FileWriter fw;
 	BufferedWriter bw;
 	ArrayList<String> error = new ArrayList<String>();
+	ArrayList<Token> tokensList = new ArrayList<Token>();
 	String lastToken = " ";
 
 	/**
@@ -73,6 +76,7 @@ public class Lexer {
 					//System.out.println("Delimitador");
 					lastToken = "DEL";
 					bw.write(line + " " + code.charAt(index) + " delimitador" + "\n");
+					tokensList.add(new Token(lastToken, String.valueOf(code.charAt(index))));
 					index++;
 				}
 				// Cadeia de caracteres
@@ -84,6 +88,7 @@ public class Lexer {
 						//System.out.println("Cadeia de caracteres");
 						lastToken = "STR";
 						bw.write(line + " " + answer.substring(1, answer.length() - 1) + " Cadeia de caracteres\n");
+						tokensList.add(new Token(lastToken, answer.substring(1, answer.length() - 1)));
 					}
 				}
 				// Operador relacional
@@ -92,6 +97,7 @@ public class Lexer {
 						|| code.charAt(index) == '>') {
 					String answer = recognizeRelop(code);
 					lastToken = "RELOP";
+					tokensList.add(new Token(lastToken, answer));
 					//System.out.println("Operador relacional");
 				}
 				// Operador logico
@@ -102,6 +108,7 @@ public class Lexer {
 						//System.out.println("Operador logico mal formado");
 					} else {
 						lastToken = "LOGOP";
+						tokensList.add(new Token(lastToken, answer));
 						//System.out.println("Operador logico");
 					}
 				}
@@ -123,6 +130,7 @@ public class Lexer {
 							lastToken = "ID";
 							bw.write(line + " " + answer + " identificador\n");
 						}
+						tokensList.add(new Token(lastToken, answer));
 						//System.out.println(answer);
 					}
 				}
@@ -135,6 +143,7 @@ public class Lexer {
 						//System.out.println("Numero:" + answer);
 						lastToken = "NUM";
 						bw.write(line + " " + answer + " numero\n");
+						tokensList.add(new Token(lastToken, answer));
 					}
 				}
 				// Operador aritmetico
@@ -143,6 +152,7 @@ public class Lexer {
 						|| code.charAt(index) == '%') {
 					lastToken = "ARIOP";
 					bw.write(line + " " + code.charAt(index) + " operador_aritmetico\n");
+					tokensList.add(new Token(lastToken, String.valueOf(code.charAt(index))));
 					index++;
 				}
 				// Desconhecido
@@ -159,7 +169,7 @@ public class Lexer {
 		} catch (StringIndexOutOfBoundsException e) {
 			// Fazer nada
 		} finally {
-			System.out.println("Codigo lido");
+			//System.out.println("Codigo lido");
 			bw.write("\n");
 			for (int i = 0; i < error.size(); i++) {
 				bw.write(error.get(i));
