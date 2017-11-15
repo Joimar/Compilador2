@@ -389,7 +389,7 @@ public class Lexer {
 					|| code.charAt(index) == 61 || code.charAt(index) == 62
 					|| code.charAt(index) == 91 || code.charAt(index) == 93
 					|| code.charAt(index) == 123 || code.charAt(index) == 124
-					|| code.charAt(index) == 125) {
+					|| code.charAt(index) == 125 || code.charAt(index) == 58) {
 				return lexema.toString();
 			}
 		}
@@ -506,7 +506,7 @@ public class Lexer {
 				|| code.charAt(index) == 91 || code.charAt(index) == 93
 				|| code.charAt(index) == 123 || code.charAt(index) == 124
 				|| code.charAt(index) == 125 || code.charAt(index) == 9
-				|| code.charAt(index) == 10 || code.charAt(index) == 13;
+				|| code.charAt(index) == 10 || code.charAt(index) == 13 || code.charAt(index) == 58;
 	}
 	
 	/**

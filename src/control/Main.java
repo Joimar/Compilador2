@@ -17,6 +17,7 @@ public class Main {
 				la.recognizeCode(dir_codes, filenames[i]);			
 				Parser parser = new Parser(la.tokensList);
 				parser.readTokens();
+				System.out.println("---------- FIM DA ANALISE SINTATICA ----------");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
