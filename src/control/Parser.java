@@ -256,4 +256,61 @@ public class Parser {
 		return false;
 	}
 	
+	public boolean recognizeIf() {
+		if (tokensList.get(index).lexeme.equals("if")) {
+			index++;
+			if (tokensToRead() && tokensList.get(index).lexeme.equals("(")) {
+				index++;
+				if (tokensToRead() && recognizeCondition()) {
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(")")) {
+						index++;
+						if (tokensToRead() && tokensList.get(index).lexeme.equals("{")) {
+							index++;
+							if (tokensToRead() && recognizeCommand()) {
+								index++;
+								if (tokensToRead() && tokensList.get(index).lexeme.equals("}")) {
+									index++;
+									if (tokensToRead() && tokensList.get(index).lexeme.equals("else")) {
+										if (recognizeElse()) {
+											return true;
+										}
+									} else {
+										return true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean recognizeElse() {
+		if (tokensList.get(index).lexeme.equals("else")) {
+			index++;
+			if (tokensToRead() && tokensList.get(index).lexeme.equals("{")) {
+				index++;
+				if (tokensToRead() && recognizeCommand()) {
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals("}")) {
+						index++;
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean recognizeCondition() {
+		return true;
+	}
+	
+	public boolean recognizeCommand() {
+		return true;
+	}
 }
+
