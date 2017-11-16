@@ -28,20 +28,20 @@ public class Parser {
 				if (token.lexeme.equals("for")) { // verifica se eh uma producao for
 					if (openMethods == 1) { // verifica se esta dentro de um metodo
 						if (!recognizeFor()) {
-							System.out.println("ERRO: Estrutura 'for' mal formada");
+							System.out.println("ERRO: Estrutura 'for' mal formada na linha " + token.line);
 						}
 					} else {
-						System.out.println("ERRO: Posicione a estrutura 'for' dentro de um metodo");
+						System.out.println("ERRO: Posicione a estrutura 'for' da linha " + token.line + " dentro de um metodo");
 						return false;
 					}
 				}
 				else if (token.lexeme.equals("print")) { // verifica se eh uma producao print
 					if (openMethods == 1) {
 						if (!recognizePrint()) {
-							System.out.println("ERRO: Estrutura 'print' mal formada");
+							System.out.println("ERRO: Estrutura 'print' mal formada na linha " + token.line);
 						}
 					} else {
-						System.out.println("ERRO: Posicione a estrutura 'print' dentro de um metodo");
+						System.out.println("ERRO: Posicione a estrutura 'print' da linha " + token.line + " dentro de um metodo");
 						return false;
 					}
 				}
@@ -49,7 +49,7 @@ public class Parser {
 					if (tokensList.get(index+2).lexeme.equals("(")) { // eh uma declaracao de metodo
 						if (openMethods == 0) { // nao ha metodos a serem fechados
 							if (!recognizeMethod()) {
-								System.out.println("ERRO: Metodo mal formado");
+								System.out.println("ERRO: Declaracao de metodo mal formada na linha " + token.line);
 							}
 						} else {
 							openMethods++;
@@ -58,24 +58,24 @@ public class Parser {
 				}
 				else if (token.lexeme.equals("<") && tokensList.get(index+1).lexeme.equals(":") && openMethods == 1) { // verifica se eh o retorno do metodo
 					if (!recognizeMethodReturn()) { // somente aqui os metodos sao fechados corretamente
-						System.out.println("ERRO: Retorno ou fim de metodo mal formado ou mal posicionado");
+						System.out.println("ERRO: Fechamento de metodo ou retorno mal formado na linha " + token.line);
 					}
 				}
 				else if (token.lexeme.equals("}")) { // verifica se eh um "}" e se existe alguma estrutura para fechar
 					if (bracesToClose > 0) {
 						bracesToClose--;						
-					} else if (openMethods == 1) { // se a estrutura que esta sendo fechada eh um metodo, esta errado
-						System.out.println("ERRO: Metodo fechado sem retorno!");
+					} else if (openMethods == 1) { // se a estrutura que esta sendo fechada eh um metodo (sem retorno antes), esta errado
+						System.out.println("ERRO: Metodo fechado sem retorno na linha " + token.line);
 						openMethods--;
 					}
 				}
 			} else {
-				System.out.println("ERRO: Nao e permitido declarar um metodo dentro de outro!");
+				System.out.println("ERRO: Nao e permitido declarar um metodo dentro de outro, verifique a linha " + token.line);
 				return false;
 			}
 		}
 		if (bracesToClose > 0) { // verifica se algum bloco esta aberto
-			System.out.println("ERRO:" + bracesToClose + " simbolos '}' faltando!"); // alerta de que eh preciso inserir simbolo(s) de "}"
+			System.out.println("ERRO: " + bracesToClose + " simbolos '}' faltando!"); // alerta de que eh preciso inserir simbolo(s) de "}"
 			return false;
 		} else {
 			return true;
@@ -138,7 +138,7 @@ public class Parser {
 						if (tokensToRead() && tokensList.get(index).lexeme.equals(methodReturnStructure[3])) { // verifica se eh ">"
 							index++;
 							if (tokensToRead() && tokensList.get(index).lexeme.equals(methodReturnStructure[4])) { // verifica se eh "}"
-								System.out.println("Estrutura do metodo sintaticamente correta");
+								System.out.println("Estrutura do metodo sintaticamente correta na linha " + tokensList.get(index).line);
 								openMethods--;
 								return true;
 							}
@@ -160,7 +160,7 @@ public class Parser {
 					if (tokensToRead() && tokensList.get(index).lexeme.equals(printStructure[2])) { // verifica se eh ")"
 						index++;
 						if (tokensToRead() && tokensList.get(index).lexeme.equals(printStructure[3])) { // verifica se eh ";"
-							System.out.println("Estrutura do 'print' sintaticamente correta");
+							System.out.println("Estrutura do 'print' sintaticamente correta na linha " + tokensList.get(index).line);
 							return true;
 						}
 					}
@@ -189,7 +189,7 @@ public class Parser {
 										index++;
 										if (tokensToRead() && tokensList.get(index).lexeme.equals(forStructure[5])) { // verifica se eh um "{"
 											bracesToClose++;
-											System.out.println("Estrutura do 'for' sintaticamente correta");
+											System.out.println("Estrutura do 'for' sintaticamente correta na linha " + tokensList.get(index).line);
 											return true;
 										}
 									}
