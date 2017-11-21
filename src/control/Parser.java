@@ -9,6 +9,13 @@ public class Parser {
 	String[] forStructure = {"for", "(", ";", ";", ")", "{"};
 	String[] printStructure = {"print", "(", ")", ";"};
 	String[] methodReturnStructure = {"<", ":", ":", ">", "}"};
+	ArrayList<String> ifSincTokens = new ArrayList<>();
+	//String[] ifSincTokens = {"int", "float", "bool", "string", "Identifier", "for", "if", "print", "scan", "+", "-", "*", "/", "%", "else"};
+	/* <Var><Comando> | <Acesso><Comando> | <Laco><Comando> | <CondicionalIf><Comando> | <print><Comando> | <scan><Comando> | <OperadorAritmetico><Comando> | <Expressao><Comando>
+	 	A → Aa | b - recursão esquerda
+	 	A → bX
+		X →	aX | ε
+	 */
 	ArrayList<Token> tokensList; // lista de tokens recebida do lexico
 	int index; // indice atual da lista de tokens
 	int bracesToClose; // numero de "}" que precisam ser encontrados
@@ -18,6 +25,22 @@ public class Parser {
 		this.tokensList = tokensList;
 		bracesToClose = 0;
 		openMethods = 0;
+		ifSincTokens.add("int");
+		ifSincTokens.add("float");
+		ifSincTokens.add("bool");
+		ifSincTokens.add("string");
+		ifSincTokens.add("Identifier");
+		ifSincTokens.add("for");
+		ifSincTokens.add("if");
+		ifSincTokens.add("print");
+		ifSincTokens.add("scan");
+		ifSincTokens.add("+");
+		ifSincTokens.add("-");
+		ifSincTokens.add("*");
+		ifSincTokens.add("/");
+		ifSincTokens.add("%");
+		ifSincTokens.add(";");
+		ifSincTokens.add("else");
 	}
 	
 	public boolean readTokens() {
@@ -42,6 +65,18 @@ public class Parser {
 						}
 					} else {
 						System.out.println("ERRO: Posicione a estrutura 'print' da linha " + token.line + " dentro de um metodo");
+						return false;
+					}
+				}
+				else if (token.lexeme.equals("if")) { // verifica se eh uma producao if
+					if (openMethods == 1) {
+						if (!recognizeIf()) {
+							System.out.println("ERRO: Estrutura 'if' mal formada na linha " + token.line);
+							index++;
+							panicModeIf();
+						}
+					} else {
+						System.out.println("ERRO: Posicione a estrutura 'if' da linha " + token.line + " dentro de um metodo");
 						return false;
 					}
 				}
@@ -286,6 +321,12 @@ public class Parser {
 			}
 		}
 		return false;
+	}
+	
+	private void panicModeIf() {
+		while (tokensToRead() && !ifSincTokens.contains(tokensList.get(index).lexeme)) {
+			index++;
+		}
 	}
 	
 	public boolean recognizeElse() {
