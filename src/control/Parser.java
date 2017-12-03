@@ -6,18 +6,53 @@ import model.Token;
 
 public class Parser {
 	
-	String[] forStructure = {"for", "(", ";", ";", ")", "{"};
+	String[] forStructure = {"for", "(", "<init>", ";", "<cond>", ";", "<incr>", ")", "{"};
 	String[] printStructure = {"print", "(", ")", ";"};
 	String[] methodReturnStructure = {"<", ":", ":", ">", "}"};
+	ArrayList<String> ifSincTokens = new ArrayList<>();
+	//String[] ifSincTokens = {"int", "float", "bool", "string", "Identifier", "for", "if", "print", "scan", "+", "-", "*", "/", "%", "else"};
+	/* <Var><Comando> | <Acesso><Comando> | <Laco><Comando> | <CondicionalIf><Comando> | <print><Comando> | <scan><Comando> | <OperadorAritmetico><Comando> | <Expressao><Comando>
+	 	A → Aa | b - recursão esquerda
+	 	A → bX
+		X →	aX | ε
+	 */
 	ArrayList<Token> tokensList; // lista de tokens recebida do lexico
 	int index; // indice atual da lista de tokens
 	int bracesToClose; // numero de "}" que precisam ser encontrados
 	int openMethods; // numero de metodos que nao foram fechados; se for maior que um, utilizar modo panico
+	ArrayList<String> errorsList;
+	ArrayList<String> forSyncTokensList;
 	
 	public Parser(ArrayList<Token> tokensList) {
 		this.tokensList = tokensList;
 		bracesToClose = 0;
 		openMethods = 0;
+		errorsList = new ArrayList<String>();
+		forSyncTokensList = new ArrayList<String>();
+		addForSyncTokens();
+	}
+	
+	public void addForSyncTokens() {
+		String[] forSyncTokens = {"for", "if", "print", "scan", "<:", "int", "float", "bool", "string"};
+		for (int i = 0; i < forSyncTokens.length; i++) {
+			forSyncTokensList.add(forSyncTokens[i]);
+		}
+		ifSincTokens.add("int");
+		ifSincTokens.add("float");
+		ifSincTokens.add("bool");
+		ifSincTokens.add("string");
+		ifSincTokens.add("Identifier");
+		ifSincTokens.add("for");
+		ifSincTokens.add("if");
+		ifSincTokens.add("print");
+		ifSincTokens.add("scan");
+		ifSincTokens.add("+");
+		ifSincTokens.add("-");
+		ifSincTokens.add("*");
+		ifSincTokens.add("/");
+		ifSincTokens.add("%");
+		ifSincTokens.add(";");
+		ifSincTokens.add("else");
 	}
 	
 	public boolean readTokens() {
@@ -26,14 +61,15 @@ public class Parser {
 			Token token = tokensList.get(index);
 			if (openMethods <= 1) {		
 				if (token.lexeme.equals("for")) { // verifica se eh uma producao for
-					if (openMethods == 1) { // verifica se esta dentro de um metodo
-						if (!recognizeFor()) {
+					//if (openMethods == 1) { // verifica se esta dentro de um metodo
+/*						if (!recognizeFor()) {
 							System.out.println("ERRO: Estrutura 'for' mal formada na linha " + token.line);
-						}
-					} else {
-						System.out.println("ERRO: Posicione a estrutura 'for' da linha " + token.line + " dentro de um metodo");
-						return false;
-					}
+						}*/
+						recognizeFor();
+					//} else {
+						//System.out.println("ERRO: Posicione a estrutura 'for' da linha " + token.line + " dentro de um metodo");
+						//return false;
+					//}
 				}
 				else if (token.lexeme.equals("print")) { // verifica se eh uma producao print
 					if (openMethods == 1) {
@@ -42,6 +78,18 @@ public class Parser {
 						}
 					} else {
 						System.out.println("ERRO: Posicione a estrutura 'print' da linha " + token.line + " dentro de um metodo");
+						return false;
+					}
+				}
+				else if (token.lexeme.equals("if")) { // verifica se eh uma producao if
+					if (openMethods == 1) {
+						if (!recognizeIf()) {
+							System.out.println("ERRO: Estrutura 'if' mal formada na linha " + token.line);
+							index++;
+							panicModeIf();
+						}
+					} else {
+						System.out.println("ERRO: Posicione a estrutura 'if' da linha " + token.line + " dentro de um metodo");
 						return false;
 					}
 				}
@@ -61,19 +109,24 @@ public class Parser {
 						System.out.println("ERRO: Fechamento de metodo ou retorno mal formado na linha " + token.line);
 					}
 				}
-				else if (token.lexeme.equals("}")) { // verifica se eh um "}" e se existe alguma estrutura para fechar
+				/*else if (token.lexeme.equals("}")) { // verifica se eh um "}" e se existe alguma estrutura para fechar
 					if (bracesToClose > 0) {
 						bracesToClose--;						
 					} else if (openMethods == 1) { // se a estrutura que esta sendo fechada eh um metodo (sem retorno antes), esta errado
 						System.out.println("ERRO: Metodo fechado sem retorno na linha " + token.line);
 						openMethods--;
 					}
-				}
+				}*/
 			} else {
 				System.out.println("ERRO: Nao e permitido declarar um metodo dentro de outro, verifique a linha " + token.line);
 				return false;
 			}
 		}
+		
+		for (int i = 0; i < errorsList.size(); i++) {
+			System.out.println(errorsList.get(i));
+		}
+		
 		if (bracesToClose > 0) { // verifica se algum bloco esta aberto
 			System.out.println("ERRO: " + bracesToClose + " simbolos '}' faltando!"); // alerta de que eh preciso inserir simbolo(s) de "}"
 			return false;
@@ -171,36 +224,50 @@ public class Parser {
 	}
 	
 	public boolean recognizeFor() {
-		if (tokensList.get(index).lexeme.equals(forStructure[0])) { // verifica se eh "for"
-			index++;
-			if (tokensToRead() && tokensList.get(index).lexeme.equals(forStructure[1])) { // verifica se eh "("
-				index++;
-				if (tokensToRead() && recognizeInitialization()) { // verifica se eh uma inicializacao
-					index++;
-					if (tokensToRead() && tokensList.get(index).lexeme.equals(forStructure[2])) { // verifica se eh um ";"
+			
+		int auxIndex = index;
+		for (int i = 0; i < forStructure.length; i++) {
+
+			if (tokensToRead()) {
+				if (i == 2) { // verifica se a inicializacao do for esta correta
+					if (recognizeInitialization()) {
 						index++;
-						if (tokensToRead() && recognizeRelationalOperation()) { // verifica se eh uma condicao
+					}
+				} else if (i == 4) { // verifica se a condicao do for esta correta
+					if (recognizeRelationalOperation()) {
+						index++;
+					}
+				} else if (i == 6) { // verifica se o incremento do for esta correto
+					if (recognizeIncrement()) {
+						index++;
+					}
+				} else { // verifica se os demais tokens estao corretos
+					if (tokensList.get(index).lexeme.equals(forStructure[i])) {
+						if (i == 8) { // se for o ultimo token
+							bracesToClose++;
+							System.out.println("For correto na linha " + tokensList.get(index).line);
+							return true;
+						} else {
 							index++;
-							if (tokensToRead() && tokensList.get(index).lexeme.equals(forStructure[3])) { // verifica se eh um ";"
-								index++;
-								if (tokensToRead() && recognizeIncrement()) { // verifica se eh um incremento
-									index++;
-									if (tokensToRead() && tokensList.get(index).lexeme.equals(forStructure[4])) { // verifica se eh um ")"
-										index++;
-										if (tokensToRead() && tokensList.get(index).lexeme.equals(forStructure[5])) { // verifica se eh um "{"
-											bracesToClose++;
-											System.out.println("Estrutura do 'for' sintaticamente correta na linha " + tokensList.get(index).line);
-											return true;
-										}
-									}
-								}
-							}
 						}
 					}
 				}
 			}
+			
+			if (index > auxIndex) {
+				auxIndex = index;
+			} else {  // se o indice nao caminhou eh porque apareceu um token nao esperado ou acabou o arquivo
+				break;
+			}
 		}
+		
+		errorsList.add("ERRO: Estrutura 'for' mal formada na linha " + tokensList.get(index-1).line); // adiciona na lista de erros, recupera-se e retorna false
+		while (tokensToRead() && !forSyncTokensList.contains(tokensList.get(index).lexeme)) { // ps.: verificar tambem se nao eh atribuicao ou operacao
+			index++;
+		}
+		index--;
 		return false;
+
 	}
 	
 	public boolean recognizeInitialization() { 
@@ -286,6 +353,12 @@ public class Parser {
 			}
 		}
 		return false;
+	}
+	
+	private void panicModeIf() {
+		while (tokensToRead() && !ifSincTokens.contains(tokensList.get(index).lexeme)) {
+			index++;
+		}
 	}
 	
 	public boolean recognizeElse() {
