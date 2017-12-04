@@ -314,7 +314,7 @@ public class Parser {
 				System.out.println("Scan correto na linha " + tokensList.get(index).line);
 				return true;
 			}
-		} else if (isAttributeType() || tokensList.get(index).type.equals("ID")) {
+		} else if ((isAttributeType() || tokensList.get(index).type.equals("ID")) && !(tokensList.get(index).type.equals("ID") && tokensList.get(index + 1).type.equals("ARIOP"))) {
 			index++;
 			if (tokensToRead() && tokensList.get(index).lexeme.equals("=")) { // inicializacao de variavel local
 				index--; // para comecar a varredura de inicializacao de variavel pelo id
