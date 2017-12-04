@@ -272,8 +272,50 @@ public class Parser {
 				System.out.println("Scan correto na linha " + tokensList.get(index).line);
 				return true;
 			}
+		} else if (tokensList.get(index).type.equals("ID")) {
+			index++;
+			if (!recognizeAcesso1()) {
+				// implementar modo panico
+				System.out.println("Token inesperado na linha " + tokensList.get(index).line);
+			} else {
+				System.out.println("Acesso correto na linha " + tokensList.get(index).line);
+				return true;
+			}
 		}
 		return false;
+	}
+	
+	public boolean recognizeAcesso1() {
+		while (tokensList.get(index).lexeme.equals(":")) {
+			index++;
+			if (!auxAcesso()) {
+				return false;
+			}
+		}
+		System.out.println("Estrutura de 'Acesso' reconhecida");
+		return true;
+	}
+	
+	public boolean auxAcesso() {
+		if (tokensList.get(index).type.equals("ID")) {
+			index++;
+			if (tokensList.get(index).lexeme.equals("(")) {
+				index++;
+				if (recognizeParams()) {
+					if (tokensList.get(index).lexeme.equals(")")) {
+						index++;
+						return true;
+					}
+				}
+			} else if (tokensList.get(index).type.equals("DEL")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean recognizeParams() {
+		return true;
 	}
 	
 	public boolean recognizeVariableDeclaration() {
