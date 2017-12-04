@@ -19,6 +19,7 @@ public class Lexer {
 	ArrayList<Token> tokensList = new ArrayList<Token>();
 	String lastToken = " ";
 
+	
 	/**
 	 * Reconhece um codigo atribuindo a funcao de reconhecimento dos lexemas
 	 * para o automato mais indicado.

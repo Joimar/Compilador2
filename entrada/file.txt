@@ -33,6 +33,7 @@ class Classe1 : Classe2 {
 		<:ret:>
 	}
 	
+	
 }
 
 class Classe3 { }
