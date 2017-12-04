@@ -1,13 +1,38 @@
-bool metodo1(int x, int y) {
-	for (x=1; x<20; x=x+1) {
-		for (y=1; y<20; y=y+1) {
-			print("Mensagem");
+string x;
+bool a, b, c;
+int[10] teste0;
+int[2] teste1, teste2;
+float[7][7] var0;
+float[4][5] var1, var2;
+e x;
+
+class Classe1 : Classe2 {	
+	
+	int x, y, z;
+	bool y, abcd, eeee;
+	string k;
+	
+	int metodo (string x, bool y) {
+		for (x=1; x<20; x=x+1) {
+			print("Teste");
+			scan(x);	
 		}
+		if (x < 20) {
+			print(x);
+			scan(x, y);
+		}
+		if (a > 40) {
+			print("Teste", a);
+			scan(a, x, y, b);
+		} else {
+		}
+		 <:z:>
 	}
-	<:true:>
+	
+	bool main() {
+		<:ret:>
+	}
+	
 }
 
-
-
-
-
+class Classe3 { }

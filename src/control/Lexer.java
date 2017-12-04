@@ -174,6 +174,8 @@ public class Lexer {
 			for (int i = 0; i < error.size(); i++) {
 				bw.write(error.get(i));
 			}
+			bw.close();
+			fw.close();
 		}
 		return true;
 	}
