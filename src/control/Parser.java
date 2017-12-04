@@ -55,11 +55,13 @@ public class Parser {
 					System.out.println("Classe correta na linha " + tokensList.get(index).line);
 				}
 			} else { // declaracao de variavel global
-				if (tokensList.get(index).lexeme.equals("final")) { // pode ser final
+				if (tokensList.get(index).lexeme.equals("final")) { // pode ser constante
 					index++;
-				}
-				if (tokensToRead() &&  (isAtributeType() || tokensList.get(index).type.equals("ID"))) {
-					readGlobalVariable();
+					if (tokensToRead() &&  (isAttributeType() || tokensList.get(index).type.equals("ID"))) {
+						recognizeGlobalVariable();
+					}
+				} else if (isAttributeType() || tokensList.get(index).type.equals("ID")) {
+					recognizeGlobalVariable();
 				}
 			}
 		}
@@ -69,21 +71,36 @@ public class Parser {
 		return true;		
 	}
 	
-	public boolean readGlobalVariable() {
-		if (isAtributeType() || tokensList.get(index).type.equals("ID")) {
+	public boolean recognizeGlobalVariable() {
+		if (isAttributeType() || tokensList.get(index).type.equals("ID")) {
 			index++;
-			if (tokensToRead() && recognizeVector()) { // verifica se eh vetor ou matriz
-				index++;
-			}
-			if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
-				index++;
-				if (tokensToRead() && (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(","))) {
-					index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do nome
-					if (!recognizeVariableDeclaration()) {
-						panicModeVariable();
-					} else {
-						System.out.println("Declaracao de variavel global correta na linha " + tokensList.get(index).line);
+			if (tokensToRead() && tokensList.get(index).lexeme.equals("=")) { // inicializacao de variavel global
+				index--; // para comecar a varredura de inicializacao de variavel pelo id
+				if (!recognizeInitialization()) { // verifica se a atribuicao esta correta
+					panicModeGlobalVariableInitialization();
+				} else {
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) {
+						System.out.println("Inicializacao de variavel global correta na linha " + tokensList.get(index).line);
 						return true;
+					} else {
+						panicModeGlobalVariableInitialization();
+					}
+				}
+			} else { // declaracao de variavel global
+				if (tokensToRead() && recognizeVector()) { // verifica se eh vetor ou matriz
+					index++;
+				}
+				if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
+					index++;
+					if (tokensToRead() && (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(","))) {
+						index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do nome
+						if (!recognizeVariableDeclaration()) {
+							panicModeGlobalVariableDeclaration();
+						} else {
+							System.out.println("Declaracao de variavel global correta na linha " + tokensList.get(index).line);
+							return true;
+						}
 					}
 				}
 			}
@@ -91,7 +108,13 @@ public class Parser {
 		return false;
 	}
 	
+	public void panicModeGlobalVariableInitialization() {
+		errorsList.add("ERRO: Inicializacao de variavel global mal formada na linha " + tokensList.get(index-1).line);
+	}
 	
+	public void panicModeGlobalVariableDeclaration() {
+		errorsList.add("ERRO: Declaracao de variavel global mal formada na linha " + tokensList.get(index-1).line);
+	}
 	
 	public boolean recognizeClass() {
 		boolean isCorrect = true;
@@ -152,40 +175,59 @@ public class Parser {
 	
 	public boolean recognizeClassContent() {
 		boolean isVector = false;
-		if (isAtributeType() || tokensList.get(index).type.equals("ID")) {
+		boolean isFinal = false;
+		if (tokensList.get(index).lexeme.equals("final")) { // atributo pode ser constante
+			isFinal = true;
 			index++;
-			if (tokensToRead() && recognizeVector()) { // verifica se eh vetor ou matriz
-				isVector = true;
-				index++;
-			}
-			
-			if (tokensToRead() && tokensList.get(index).lexeme.equals("main") && isVector == false) {
-				index--;
-				if (!recognizeMain()) {
-					panicModeMethod();
+		}
+		if (tokensToRead() && (isAttributeType() || tokensList.get(index).type.equals("ID"))) {
+			index++;
+			if (tokensToRead() && tokensList.get(index).lexeme.equals("=") && isVector == false && isFinal == false) { // inicializacao de atributo
+				index--; // para comecar a varredura de inicializacao de variavel pelo id
+				if (!recognizeInitialization()) { // verifica se a atribuicao esta correta
+					panicModeAttributeInitialization();
 				} else {
-					System.out.println("Main correta na linha " + tokensList.get(index).line);
-					return true;
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) {
+						System.out.println("Inicializacao de atributo correta na linha " + tokensList.get(index).line);
+						return true;
+					} else {
+						panicModeAttributeInitialization();
+					}
 				}
-			} else if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
-				index++;
-				if (tokensToRead() && tokensList.get(index).lexeme.equals("(") && isVector == false) { // declaracao de metodo
-					index = index - 2; // para comecar a varredura da estrutura do metodo a partir do tipo de retorno
-					if (!recognizeMethod()) {
+			} else { // declaracao de atributo ou metodo
+				if (tokensToRead() && recognizeVector()) { // verifica se eh vetor ou matriz
+					isVector = true;
+					index++;
+				}
+				if (tokensToRead() && tokensList.get(index).lexeme.equals("main") && isVector == false && isFinal == false) { // declaracao da main nao pode ter vetor nem final
+					index--;
+					if (!recognizeMain()) {
 						panicModeMethod();
 					} else {
-						System.out.println("Metodo correto na linha " + tokensList.get(index).line);
+						System.out.println("Main correta na linha " + tokensList.get(index).line);
 						return true;
 					}
-				} else if (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(",")) { // declaracao de variavel
-					index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do nome
-					if (!recognizeVariableDeclaration()) {
-						panicModeVariable();
-					} else {
-						System.out.println("Declaracao de variavel correta na linha " + tokensList.get(index).line);
-						return true;
-					}
-				} 
+				} else if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals("(") && isVector == false && isFinal == false) { // declaracao de metodo nao pode ter vetor nem final
+						index = index - 2; // para comecar a varredura da estrutura do metodo a partir do tipo de retorno
+						if (!recognizeMethod()) {
+							panicModeMethod();
+						} else {
+							System.out.println("Metodo correto na linha " + tokensList.get(index).line);
+							return true;
+						}
+					} else if (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(",")) { // declaracao de variavel
+						index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do nome
+						if (!recognizeVariableDeclaration()) {
+							panicModeAttributeDeclaration();
+						} else {
+							System.out.println("Declaracao de atributo correta na linha " + tokensList.get(index).line);
+							return true;
+						}
+					} 
+				}
 			}
 		}
 		return false;
@@ -272,8 +314,48 @@ public class Parser {
 				System.out.println("Scan correto na linha " + tokensList.get(index).line);
 				return true;
 			}
+		} else if (isAttributeType() || tokensList.get(index).type.equals("ID")) {
+			index++;
+			if (tokensToRead() && tokensList.get(index).lexeme.equals("=")) { // inicializacao de variavel local
+				index--; // para comecar a varredura de inicializacao de variavel pelo id
+				if (!recognizeInitialization()) { // verifica se a atribuicao esta correta
+					panicModeLocalVariableInitialization();
+				} else {
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) {
+						System.out.println("Inicializacao de variavel local correta na linha " + tokensList.get(index).line);
+						return true;
+					} else {
+						panicModeLocalVariableInitialization();
+					}
+				}
+			} else { // declaracao de variavel local
+				if (tokensToRead() && recognizeVector()) { // verifica se eh vetor ou matriz
+					index++;
+				}
+				if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
+					index++;
+					if (tokensToRead() && (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(","))) {
+						index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do nome
+						if (!recognizeVariableDeclaration()) {
+							panicModeLocalVariableDeclaration();
+						} else {
+							System.out.println("Declaracao de variavel local correta na linha " + tokensList.get(index).line);
+							return true;
+						}
+					}
+				}
+			}
 		}
 		return false;
+	}
+	
+	public void panicModeLocalVariableDeclaration() {
+		errorsList.add("ERRO: Declaracao de variavel local mal formada na linha " + tokensList.get(index-1).line);
+	}
+	
+	public void panicModeLocalVariableInitialization() {
+		errorsList.add("ERRO: Inicializacao de variavel local mal formada na linha " + tokensList.get(index-1).line);
 	}
 	
 	public boolean recognizeVariableDeclaration() {
@@ -302,8 +384,12 @@ public class Parser {
 		return true;
 	}
 	
-	public void panicModeVariable() {
-		errorsList.add("ERRO: Declaracao de variavel mal formada na linha " + tokensList.get(index-1).line);
+	public void panicModeAttributeDeclaration() {
+		errorsList.add("ERRO: Declaracao de atributo mal formada na linha " + tokensList.get(index-1).line);
+	}
+	
+	public void panicModeAttributeInitialization() {
+		errorsList.add("ERRO: Inicializacao de atributo mal formada na linha " + tokensList.get(index-1).line);
 	}
 	
 	public boolean recognizeMethod() {
@@ -312,7 +398,7 @@ public class Parser {
 		while (methodIndex < methodStructure.length) {
 			if (tokensToRead()) {
 				if (methodIndex == 0) { // verifica se o retorno do metodo esta correto
-					if (!(isAtributeType() || tokensList.get(index).type.equals("ID"))) {
+					if (!(isAttributeType() || tokensList.get(index).type.equals("ID"))) {
 						isCorrect = false;
 					}
 					methodIndex++;
@@ -372,7 +458,7 @@ public class Parser {
 		boolean isFirstParameter = true;
 		while (tokensToRead() && !tokensList.get(index).lexeme.equals(")")) {
 			if (isFirstParameter) { // se for o primeiro parametro, nao tem virgula antes
-				if (isAtributeType() || tokensList.get(index).type.equals("ID")) { // verifica se o tipo do parametro esta correto
+				if (isAttributeType() || tokensList.get(index).type.equals("ID")) { // verifica se o tipo do parametro esta correto
 					index++;
 				} else {
 					return false;
@@ -389,7 +475,7 @@ public class Parser {
 				} else {
 					return false;
 				}
-				if (tokensToRead() && (isAtributeType() || tokensList.get(index).type.equals("ID"))) { // verifica se o tipo do parametro esta correto
+				if (tokensToRead() && (isAttributeType() || tokensList.get(index).type.equals("ID"))) { // verifica se o tipo do parametro esta correto
 					index++;
 				} else {
 					return false;
@@ -696,7 +782,7 @@ public class Parser {
 		errorsList.add("ERRO: Estrutura 'scan' mal formada na linha " + tokensList.get(index-1).line);
 	}
 	
-	public boolean isAtributeType() {
+	public boolean isAttributeType() {
 		return (tokensList.get(index).lexeme.equals("int") || tokensList.get(index).lexeme.equals("float") ||
 				tokensList.get(index).lexeme.equals("bool") || tokensList.get(index).lexeme.equals("string"));
 	}
@@ -710,7 +796,8 @@ public class Parser {
 			index++;
 			if (tokensToRead() && tokensList.get(index).lexeme.equals("=")) {
 				index++;
-				if (tokensToRead() && tokensList.get(index).type.equals("ID") || tokensList.get(index).type.equals("NUM")) {
+				if (tokensToRead() && tokensList.get(index).type.equals("ID") || tokensList.get(index).type.equals("NUM") || tokensList.get(index).type.equals("STR") || 
+						tokensList.get(index).lexeme.equals("true") || tokensList.get(index).lexeme.equals("false")) {
 					return true;
 				}
 			}
@@ -781,5 +868,4 @@ public class Parser {
 		return false;
 	}
 
-	
 }
