@@ -20,6 +20,7 @@ class Classe1 : Classe2 {
 		if (a > 40) {
 			print("Teste", a);
 			scan(a, x, y, b);
+			teste:teste:teste:teste():teste():teste;
 		} else {
 		}
 		 <:z:>

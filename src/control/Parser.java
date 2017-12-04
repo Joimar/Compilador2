@@ -346,6 +346,24 @@ public class Parser {
 					}
 				}
 			}
+		} else if (tokensList.get(index).type.equals("ID") && tokensList.get(index + 1).type.equals("ARIOP")) {
+			if (!recognizeArithmeticOperation()) {
+				// implementar modo panico
+				System.out.println("-- 1");
+				System.out.println("Erro de Operacao aritmetica na linha " + tokensList.get(index).line);
+			} else {
+				System.out.println("Operacao aritmetica correta na linha " + tokensList.get(index).line);
+				return true;
+			}
+		} else if (tokensList.get(index).type.equals("ID")) {
+			index++;
+			if (!recognizeAcesso1()) {
+				// implementar modo panico
+				System.out.println("Erro de Acesso na linha " + tokensList.get(index).line);
+			} else {
+				System.out.println("Acesso correto na linha " + tokensList.get(index).line);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -356,6 +374,38 @@ public class Parser {
 	
 	public void panicModeLocalVariableInitialization() {
 		errorsList.add("ERRO: Inicializacao de variavel local mal formada na linha " + tokensList.get(index-1).line);
+	}
+		
+	public boolean recognizeAcesso1() {
+		while (tokensList.get(index).lexeme.equals(":")) {
+			index++;
+			if (!auxAcesso()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean auxAcesso() {
+		if (tokensList.get(index).type.equals("ID")) {
+			index++;
+			if (tokensList.get(index).lexeme.equals("(")) {
+				index++;
+				if (recognizeParams()) {
+					if (tokensList.get(index).lexeme.equals(")")) {
+						index++;
+						return true;
+					}
+				}
+			} else if (tokensList.get(index).type.equals("DEL")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean recognizeParams() {
+		return true;
 	}
 	
 	public boolean recognizeVariableDeclaration() {
@@ -538,7 +588,7 @@ public class Parser {
 						isCorrect = false;
 					}
 					forIndex++;
-					index++;
+					/*index++;*/
 				} else if (forIndex == 9) { // verifica se os comandos estao corretos
 					if (tokensList.get(index).lexeme.equals("}")) { // se for um um "}" eh porque nao ha nenhum comando dentro do for
 						forIndex++;
@@ -835,11 +885,14 @@ public class Parser {
 	public boolean recognizeArithmeticOperation() {
 		if (tokensList.get(index).type.equals("ID") || tokensList.get(index).type.equals("NUM")) {
 			index++;
-			if (tokensToRead() && tokensList.get(index).type.equals("ARIOP")) {
+			while (tokensToRead() && tokensList.get(index).type.equals("ARIOP")) {
 				index++;
 				if (tokensToRead() && tokensList.get(index).type.equals("ID") || tokensList.get(index).type.equals("NUM")) {
-					return true;
+					index++;
 				}
+			}
+			if (tokensToRead() && tokensList.get(index).type.equals("DEL")) {
+				return true;
 			}
 		}
 		return false;
@@ -867,5 +920,6 @@ public class Parser {
 		}
 		return false;
 	}
-
 }
+	
+
