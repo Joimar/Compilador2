@@ -1,27 +1,34 @@
+int x, a, b;
+
 class Classe1 : Classe2 {	
+	float c, d, e;
 	
-	int metodo (string x, bool y) {
-		
+	int metodo (string x, bool y) {	
 		bool a, b, c;
 		a = true;
 		int[10] teste0;
 		teste0 = 546;
 		float[4][5] var1, var2;
 		var1 = 123.000;
+		int i;
+		i = g / h + a - b * c % d;
 		
-		for (x=1; x<20; x=x+1) {
+		metodo1();
+		
+		for (x=1; x<20 && x!=10; x=x+1) {
 			print("Teste");
 			scan(x);	
 		}
-		if (x < 20) {
+		if (x < 20 && x > 30) {
 			print(x);
 			scan(x, y);
 		}
-		if (a > 40) {
+		if (a > 40 || a < 10) {
 			print("Teste", a);
 			scan(a, x, y, b);
-			teste:teste:teste:teste():teste():teste;
+
 		} else {
+			acesso1:acesso2:acesso3:acesso4(x):acesso5(x, y):acesso6():acesso7(x, y, z, a, b, c);
 		}
 		 <:z:>
 	}
@@ -29,8 +36,6 @@ class Classe1 : Classe2 {
 	bool main() {
 		<:ret:>
 	}
-	
-	
 }
 
 class Classe3 { }

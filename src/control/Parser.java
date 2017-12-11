@@ -62,6 +62,8 @@ public class Parser {
 					}
 				} else if (isAttributeType() || tokensList.get(index).type.equals("ID")) {
 					recognizeGlobalVariable();
+				} else {
+					// Comando nao reconhecido
 				}
 			}
 		}
@@ -80,9 +82,17 @@ public class Parser {
 					panicModeGlobalVariableInitialization();
 				} else {
 					index++;
-					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) {
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) { // inicializacao
 						System.out.println("Inicializacao de variavel global correta na linha " + tokensList.get(index).line);
 						return true;
+					} else if (tokensToRead() && tokensList.get(index).type.equals("ARIOP")) { // inicializacao com operacao aritmetica
+						index++;
+						if (tokensToRead() && recognizeArithmeticOperation()) {
+							System.out.println("Inicializacao de variavel global com operacao aritmetica correta na linha " + tokensList.get(index).line);
+							return true;
+						} else {
+							panicModeGlobalVariableInitialization();
+						}
 					} else {
 						panicModeGlobalVariableInitialization();
 					}
@@ -94,15 +104,20 @@ public class Parser {
 				if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
 					index++;
 					if (tokensToRead() && (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(","))) {
-						index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do nome
+						index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do id
 						if (!recognizeVariableDeclaration()) {
 							panicModeGlobalVariableDeclaration();
 						} else {
 							System.out.println("Declaracao de variavel global correta na linha " + tokensList.get(index).line);
 							return true;
 						}
+					} else {
+						panicModeGlobalVariableDeclaration();
 					}
-				}
+				} 
+				//else {
+					//panicModeGlobalVariableDeclaration();
+				//}
 			}
 		}
 		return false;
@@ -113,7 +128,7 @@ public class Parser {
 	}
 	
 	public void panicModeGlobalVariableDeclaration() {
-		errorsList.add("ERRO: Declaracao de variavel global mal formada na linha " + tokensList.get(index-1).line);
+		errorsList.add("ERRO: Declaracao de variavel global mal formada na linha " + tokensList.get(index-1).line + " Token: " + tokensList.get(index-1).lexeme);
 	}
 	
 	public boolean recognizeClass() {
@@ -188,9 +203,17 @@ public class Parser {
 					panicModeAttributeInitialization();
 				} else {
 					index++;
-					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) {
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) { // inicializacao
 						System.out.println("Inicializacao de atributo correta na linha " + tokensList.get(index).line);
 						return true;
+					} else if (tokensToRead() && tokensList.get(index).type.equals("ARIOP")) { // inicializacao com operacao aritmetica
+						index++;
+						if (tokensToRead() && recognizeArithmeticOperation()) {
+							System.out.println("Inicializacao de atributo com operacao aritmetica correta na linha " + tokensList.get(index).line);
+							return true;
+						} else {
+							panicModeAttributeInitialization();
+						}
 					} else {
 						panicModeAttributeInitialization();
 					}
@@ -226,7 +249,11 @@ public class Parser {
 							System.out.println("Declaracao de atributo correta na linha " + tokensList.get(index).line);
 							return true;
 						}
-					} 
+					} else {
+						panicModeAttributeDeclaration();
+					}
+				} else {
+					panicModeAttributeDeclaration();
 				}
 			}
 		}
@@ -286,35 +313,35 @@ public class Parser {
 	}
 	
 	public boolean recognizeCommand() {
-		if (tokensList.get(index).lexeme.equals("for")) {
+		if (tokensList.get(index).lexeme.equals("for")) { // comando for
 			if (!recognizeTokenFor()) {
 				panicModeFor();
 			} else {
 				System.out.println("For correto na linha " + tokensList.get(index).line);
 				return true;
 			}
-		} else if (tokensList.get(index).lexeme.equals("if")) {
+		} else if (tokensList.get(index).lexeme.equals("if")) { // comando if
 			if (!recognizeTokenIf()) {
 				panicModeIf();
 			} else {
 				System.out.println("If correto na linha " + tokensList.get(index).line);
 				return true;
 			}
-		} else if (tokensList.get(index).lexeme.equals("print")) {
+		} else if (tokensList.get(index).lexeme.equals("print")) { // comando print
 			if (!recognizeTokenPrint()) {
 				panicModePrint();
 			} else {
 				System.out.println("Print correto na linha " + tokensList.get(index).line);
 				return true;
 			}
-		} else if (tokensList.get(index).lexeme.equals("scan")) {
+		} else if (tokensList.get(index).lexeme.equals("scan")) { // comando scan
 			if (!recognizeTokenScan()) {
 				panicModeScan();
 			} else {
 				System.out.println("Scan correto na linha " + tokensList.get(index).line);
 				return true;
 			}
-		} else if ((isAttributeType() || tokensList.get(index).type.equals("ID")) && !(tokensList.get(index).type.equals("ID") && tokensList.get(index + 1).type.equals("ARIOP"))) {
+		} else if (isAttributeType() || tokensList.get(index).type.equals("ID")) { // inicializacao
 			index++;
 			if (tokensToRead() && tokensList.get(index).lexeme.equals("=")) { // inicializacao de variavel local
 				index--; // para comecar a varredura de inicializacao de variavel pelo id
@@ -322,12 +349,43 @@ public class Parser {
 					panicModeLocalVariableInitialization();
 				} else {
 					index++;
-					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) {
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) { // inicializacao
 						System.out.println("Inicializacao de variavel local correta na linha " + tokensList.get(index).line);
 						return true;
+					} else if (tokensToRead() && tokensList.get(index).type.equals("ARIOP")) { // inicializacao com operacao aritmetica
+						index++;
+						if (tokensToRead() && recognizeArithmeticOperation()) {
+							System.out.println("Inicializacao de variavel local com operacao aritmetica correta na linha " + tokensList.get(index).line);
+							return true;
+						} else {
+							panicModeLocalVariableInitialization();
+						}
 					} else {
 						panicModeLocalVariableInitialization();
 					}
+				}
+			} else if (tokensToRead() && tokensList.get(index).type.equals("ARIOP")) { // operacao aritmetica
+				index++;
+				if (tokensToRead() && recognizeArithmeticOperation()) {
+					System.out.println("Operacao aritmetica correta na linha " + tokensList.get(index).line);
+					return true;
+				} else {
+					panicModeArithmeticOperation();
+				}
+			
+			} else if (tokensToRead() && tokensList.get(index).lexeme.equals(":")) { // acesso a metodos ou atributos de objetos
+				if (recognizeAccess()) {
+					System.out.println("Acesso correto na linha " + tokensList.get(index).line);
+					return true;
+				} else {
+					panicModeAccess();
+				} 	
+			} else if (tokensToRead() && tokensList.get(index).lexeme.equals("(")) { // chamada a outro metodo da classe
+				if (recognizeMethodCall()) {
+					System.out.println("Chamada a metodo correta na linha " + tokensList.get(index).line);
+					return true;
+				} else {
+					panicModeMethodCall();
 				}
 			} else { // declaracao de variavel local
 				if (tokensToRead() && recognizeVector()) { // verifica se eh vetor ou matriz
@@ -336,35 +394,19 @@ public class Parser {
 				if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
 					index++;
 					if (tokensToRead() && (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(","))) {
-						index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do nome
+						index--; // para comecar a varredura da estrutura de declaracao de variavel a partir do id
 						if (!recognizeVariableDeclaration()) {
 							panicModeLocalVariableDeclaration();
 						} else {
 							System.out.println("Declaracao de variavel local correta na linha " + tokensList.get(index).line);
 							return true;
 						}
+					} else {
+						panicModeLocalVariableDeclaration();
 					}
 				}
 			}
-		} else if (tokensList.get(index).type.equals("ID") && tokensList.get(index + 1).type.equals("ARIOP")) {
-			if (!recognizeArithmeticOperation()) {
-				// implementar modo panico
-				System.out.println("-- 1");
-				System.out.println("Erro de Operacao aritmetica na linha " + tokensList.get(index).line);
-			} else {
-				System.out.println("Operacao aritmetica correta na linha " + tokensList.get(index).line);
-				return true;
-			}
-		} else if (tokensList.get(index).type.equals("ID")) {
-			index++;
-			if (!recognizeAcesso1()) {
-				// implementar modo panico
-				System.out.println("Erro de Acesso na linha " + tokensList.get(index).line);
-			} else {
-				System.out.println("Acesso correto na linha " + tokensList.get(index).line);
-				return true;
-			}
-		}
+		} 
 		return false;
 	}
 	
@@ -375,37 +417,62 @@ public class Parser {
 	public void panicModeLocalVariableInitialization() {
 		errorsList.add("ERRO: Inicializacao de variavel local mal formada na linha " + tokensList.get(index-1).line);
 	}
-		
-	public boolean recognizeAcesso1() {
-		while (tokensList.get(index).lexeme.equals(":")) {
+	
+	public void panicModeArithmeticOperation() {
+		errorsList.add("ERRO: Operacao aritmetica mal formada na linha " + tokensList.get(index-1).line);
+	}
+	
+	public void panicModeAccess() {
+		errorsList.add("ERRO: Acesso mal formado na linha " + tokensList.get(index-1).line);
+	}
+	
+	public void panicModeMethodCall() {
+		errorsList.add("ERRO: Chamada a metodo mal feita na linha " + tokensList.get(index-1).line);
+	}
+	
+	public boolean recognizeMethodCall() {
+		if (tokensToRead() && tokensList.get(index).lexeme.equals("(")) {
 			index++;
-			if (!auxAcesso()) {
+			if (tokensToRead() && recognizeScanContent()) {
+				index++;
+				if (tokensToRead() && tokensList.get(index).lexeme.equals(")")) {
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(";")) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+		
+	public boolean recognizeAccess() {
+		while (tokensToRead() && tokensList.get(index).lexeme.equals(":")) {
+			index++;
+			if (!recognizeObjectAccess()) {
 				return false;
 			}
 		}
 		return true;
 	}
 	
-	public boolean auxAcesso() {
-		if (tokensList.get(index).type.equals("ID")) {
+	public boolean recognizeObjectAccess() {
+		if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
 			index++;
-			if (tokensList.get(index).lexeme.equals("(")) {
+			if (tokensToRead() && tokensList.get(index).lexeme.equals("(")) {
 				index++;
-				if (recognizeParams()) {
-					if (tokensList.get(index).lexeme.equals(")")) {
+				if (tokensToRead() && recognizeScanContent()) {
+					index++;
+					if (tokensToRead() && tokensList.get(index).lexeme.equals(")")) {
 						index++;
 						return true;
 					}
 				}
-			} else if (tokensList.get(index).type.equals("DEL")) {
+			} else if (tokensToRead() && (tokensList.get(index).lexeme.equals(";") || tokensList.get(index).lexeme.equals(":"))) {
 				return true;
 			}
 		}
 		return false;
-	}
-	
-	public boolean recognizeParams() {
-		return true;
 	}
 	
 	public boolean recognizeVariableDeclaration() {
@@ -856,7 +923,7 @@ public class Parser {
 	}
 	
 	public boolean recognizeIncrement() {
-		if (tokensList.get(index).type.equals("ID")) {
+		if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
 			index++;
 			if (tokensToRead() && tokensList.get(index).lexeme.equals("=")) {
 				index++;
@@ -869,14 +936,29 @@ public class Parser {
 	}
 	
 	public boolean recognizeRelationalOperation() {
-		if (tokensList.get(index).type.equals("ID")) {
+		if (tokensToRead() && tokensList.get(index).type.equals("ID")) {
 			index++;
 			if (tokensToRead() && tokensList.get(index).type.equals("RELOP")) {
 				index++;
 				if (tokensToRead() && tokensList.get(index).type.equals("ID") || tokensList.get(index).type.equals("NUM") || tokensList.get(index).type.equals("STR") || 
 						tokensList.get(index).lexeme.equals("true") || tokensList.get(index).lexeme.equals("false")) {
-					return true;
+					if (tokensList.get(index+1).lexeme.equals(";") || tokensList.get(index+1).lexeme.equals(")")) {
+						return true;
+					} else {
+						index++;
+						return recognizeLogicalOperation();
+					}
 				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean recognizeLogicalOperation() {
+		if (tokensToRead() && (tokensList.get(index).lexeme.equals("&&") || tokensList.get(index).lexeme.equals("||"))) {
+			index++;
+			if (tokensToRead()) {
+				return recognizeRelationalOperation();
 			}
 		}
 		return false;
@@ -921,5 +1003,3 @@ public class Parser {
 		return false;
 	}
 }
-	
-
