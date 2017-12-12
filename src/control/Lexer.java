@@ -13,8 +13,8 @@ import model.Token;
 public class Lexer {
 	int index = 0;
 	int line = 1;
-	FileWriter fw;
-	BufferedWriter bw;
+	//FileWriter fw;
+	//BufferedWriter bw;
 	ArrayList<String> error = new ArrayList<String>();
 	ArrayList<Token> tokensList = new ArrayList<Token>();
 	String lastToken = " ";
@@ -41,8 +41,8 @@ public class Lexer {
 		
 		String code = readTextFile(dir + "/" + filename);
 		index = 0;
-		fw = new FileWriter(dir + "/results/" + filename);
-		bw = new BufferedWriter(fw);
+		//fw = new FileWriter(dir + "/results/" + filename);
+		//bw = new BufferedWriter(fw);
 
 		try {
 			while (index < code.length() && code.charAt(index) != 3) {
@@ -76,7 +76,7 @@ public class Lexer {
 						|| code.charAt(index) == ':') {
 					//System.out.println("Delimitador");
 					lastToken = "DEL";
-					bw.write(line + " " + code.charAt(index) + " delimitador" + "\n");
+					//bw.write(line + " " + code.charAt(index) + " delimitador" + "\n");
 					tokensList.add(new Token(lastToken, String.valueOf(code.charAt(index)), line));
 					index++;
 				}
@@ -88,7 +88,7 @@ public class Lexer {
 					} else {
 						//System.out.println("Cadeia de caracteres");
 						lastToken = "STR";
-						bw.write(line + " " + answer.substring(1, answer.length() - 1) + " Cadeia de caracteres\n");
+						//bw.write(line + " " + answer.substring(1, answer.length() - 1) + " Cadeia de caracteres\n");
 						tokensList.add(new Token(lastToken, answer.substring(1, answer.length() - 1), line));
 					}
 				}
@@ -126,10 +126,10 @@ public class Lexer {
 								|| answer.equals("bool") || answer.equals("true") || answer.equals("false")
 								|| answer.equals("string")) {
 							lastToken = "RES";
-							bw.write(line + " " + answer + " palavra_reservada\n");
+							//bw.write(line + " " + answer + " palavra_reservada\n");
 						} else {
 							lastToken = "ID";
-							bw.write(line + " " + answer + " identificador\n");
+							//bw.write(line + " " + answer + " identificador\n");
 						}
 						tokensList.add(new Token(lastToken, answer, line));
 						//System.out.println(answer);
@@ -143,7 +143,7 @@ public class Lexer {
 					} else {
 						//System.out.println("Numero:" + answer);
 						lastToken = "NUM";
-						bw.write(line + " " + answer + " numero\n");
+						//bw.write(line + " " + answer + " numero\n");
 						tokensList.add(new Token(lastToken, answer, line));
 					}
 				}
@@ -152,7 +152,7 @@ public class Lexer {
 						|| code.charAt(index) == '*' || code.charAt(index) == '/'
 						|| code.charAt(index) == '%') {
 					lastToken = "ARIOP";
-					bw.write(line + " " + code.charAt(index) + " operador_aritmetico\n");
+					//bw.write(line + " " + code.charAt(index) + " operador_aritmetico\n");
 					tokensList.add(new Token(lastToken, String.valueOf(code.charAt(index)), line));
 					index++;
 				}
@@ -171,12 +171,12 @@ public class Lexer {
 			// Fazer nada
 		} finally {
 			//System.out.println("Codigo lido");
-			bw.write("\n");
-			for (int i = 0; i < error.size(); i++) {
-				bw.write(error.get(i));
-			}
-			bw.close();
-			fw.close();
+			//bw.write("\n");
+			//for (int i = 0; i < error.size(); i++) {
+				//bw.write(error.get(i));
+			//}
+			//bw.close();
+			//fw.close();
 		}
 		return true;
 	}
@@ -314,7 +314,7 @@ public class Lexer {
 			index++;
 			value = "GT";
 		}
-		bw.write(line + " " + lexema.toString() + " operador_relacional\n");
+		//bw.write(line + " " + lexema.toString() + " operador_relacional\n");
 		return lexema.toString();
 	}
 
@@ -356,7 +356,7 @@ public class Lexer {
 			index++;
 			value = "NOT";
 		}
-		bw.write(line + " " + lexema.toString() + " operador_logico\n");
+		//bw.write(line + " " + lexema.toString() + " operador_logico\n");
 		return lexema.toString();
 	}
 
